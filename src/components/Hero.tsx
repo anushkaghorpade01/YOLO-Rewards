@@ -4,32 +4,31 @@ import React, { useEffect, useRef, useState, forwardRef } from "react";
 const ParachuteIcon = forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>((props, ref) => {
   return (
     <svg ref={ref} viewBox="0 0 64 64" aria-hidden="true" {...props}>
-      {/* White parachute canopy */}
-      <path d="M8 20 C 24 4, 40 4, 56 20" fill="none" stroke="#FFFFFF" strokeWidth="2"/>
-      <path d="M8 20 Q 32 8 56 20 L 8 20 Z" fill="#FFFFFF"/>
-      {/* FLENT text - bold and visible */}
+      {/* White filled parachute canopy */}
+      <path d="M8 20 Q 32 8 56 20 Q 50 35 32 40 Q 14 35 8 20 Z" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="2"/>
+      {/* FLENT text - bold and highly visible */}
       <text 
         x="32" 
-        y="18" 
+        y="24" 
         textAnchor="middle" 
-        fontSize="8" 
+        fontSize="9" 
         fontWeight="900"
         fill="#0A0A0A"
-        style={{fontFamily:"Plus Jakarta Sans,system-ui",letterSpacing:"0.5px"}}
+        style={{fontFamily:"Plus Jakarta Sans,system-ui",letterSpacing:"1px"}}
       >
         FLENT
       </text>
       {/* Parachute lines */}
-      <line x1="32" y1="20" x2="32" y2="32" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="24" y1="20" x2="32" y2="32" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="40" y1="20" x2="32" y2="32" stroke="#FFFFFF" strokeWidth="1.5"/>
+      <line x1="14" y1="28" x2="30" y2="42" stroke="#FFFFFF" strokeWidth="1.5"/>
+      <line x1="32" y1="32" x2="32" y2="42" stroke="#FFFFFF" strokeWidth="1.5"/>
+      <line x1="50" y1="28" x2="34" y2="42" stroke="#FFFFFF" strokeWidth="1.5"/>
       {/* Stick figure */}
-      <circle cx="32" cy="36" r="2" fill="#FFFFFF"/>
-      <line x1="32" y1="38" x2="32" y2="46" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="32" y1="40.5" x2="26.5" y2="44" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="32" y1="40.5" x2="37.5" y2="44" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="32" y1="46" x2="28" y2="52" stroke="#FFFFFF" strokeWidth="1.5"/>
-      <line x1="32" y1="46" x2="36" y2="52" stroke="#FFFFFF" strokeWidth="1.5"/>
+      <circle cx="32" cy="46" r="2.5" fill="#FFFFFF"/>
+      <line x1="32" y1="48.5" x2="32" y2="56" stroke="#FFFFFF" strokeWidth="2"/>
+      <line x1="32" y1="51" x2="26" y2="54" stroke="#FFFFFF" strokeWidth="2"/>
+      <line x1="32" y1="51" x2="38" y2="54" stroke="#FFFFFF" strokeWidth="2"/>
+      <line x1="32" y1="56" x2="27" y2="62" stroke="#FFFFFF" strokeWidth="2"/>
+      <line x1="32" y1="56" x2="37" y2="62" stroke="#FFFFFF" strokeWidth="2"/>
     </svg>
   );
 });
@@ -121,13 +120,13 @@ export const Hero = () => {
               transform: "translateY(-0.05em)"
             }}
           />
-          {/* parachute - starts from very top of screen */}
+          {/* parachute - starts from very top of screen, lands inline with text */}
           <ParachuteIcon
             ref={chuteRef}
             className="absolute pointer-events-none"
             style={{
               left: "100%",
-              top: "0",
+              top: "50%",
               width: "72px",
               color: "#FFFFFF",
               zIndex: 3,
@@ -174,7 +173,7 @@ function runParachute(chute: Element, dot: HTMLElement) {
       { transform: "translate(-65%, -14vh) rotate(-10deg)", offset: 0.70 },
       { transform: "translate(-62%, -7vh) rotate(-7deg)", offset: 0.82 },
       { transform: "translate(-55%, -2vh) rotate(-2deg)", offset: 0.92 },
-      { transform: "translate(-50%, 0vh) rotate(0deg)", offset: 1 }
+      { transform: "translate(-50%, -50%) rotate(0deg)", offset: 1 }
     ],
     { duration: 6000, easing: "cubic-bezier(0.25, 0.1, 0.25, 1)", fill: "forwards" }
   );
@@ -184,10 +183,10 @@ function runParachute(chute: Element, dot: HTMLElement) {
     chute
       .animate(
         [
-          { transform: "translate(-50%, 0) rotate(0deg)" },
-          { transform: "translate(-52%, 0) rotate(-2deg)" },
-          { transform: "translate(-48%, 0) rotate(1deg)" },
-          { transform: "translate(-50%, 0) rotate(0deg)" }
+          { transform: "translate(-50%, -50%) rotate(0deg)" },
+          { transform: "translate(-52%, -50%) rotate(-2deg)" },
+          { transform: "translate(-48%, -50%) rotate(1deg)" },
+          { transform: "translate(-50%, -50%) rotate(0deg)" }
         ],
         { duration: 800, easing: "ease-out", fill: "forwards" }
       )
