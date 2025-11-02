@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef } from "react";
 
-/* Inline parachute (no SVGR dependency) */
-function ParachuteIcon(props: React.SVGProps<SVGSVGElement>) {
+/* Inline parachute with proper ref forwarding */
+const ParachuteIcon = forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>((props, ref) => {
   return (
-    <svg viewBox="0 0 64 64" aria-hidden="true" {...props}>
+    <svg ref={ref} viewBox="0 0 64 64" aria-hidden="true" {...props}>
       <path d="M8 20 C 24 4, 40 4, 56 20" fill="none" stroke="currentColor" strokeWidth="2"/>
       <path d="M8 20 Q 32 8 56 20 L 8 20 Z" fill="currentColor"/>
       <text x="32" y="17" textAnchor="middle" fontSize="6" fill="#000"
@@ -19,7 +19,9 @@ function ParachuteIcon(props: React.SVGProps<SVGSVGElement>) {
       <line x1="32" y1="46" x2="36" y2="52" stroke="currentColor" strokeWidth="1.5"/>
     </svg>
   );
-}
+});
+
+ParachuteIcon.displayName = "ParachuteIcon";
 
 export const Hero = () => {
   const [showNavigation, setShowNavigation] = useState(false);
@@ -101,7 +103,7 @@ export const Hero = () => {
           />
           {/* smaller parachute */}
           <ParachuteIcon
-            ref={chuteRef as any}
+            ref={chuteRef}
             className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
             style={{
               top: "-18svh",
