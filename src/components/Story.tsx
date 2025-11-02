@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const storyLines = [
   '"Refer and earn up to this"',
@@ -21,8 +21,7 @@ const storyLines = [
 export const Story = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeLine, setActiveLine] = useState(0);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
@@ -32,40 +31,50 @@ export const Story = () => {
   const ruleY = useTransform(scrollYProgress, [0, 1], [0, 18]);
   const coralRuleY = useTransform(scrollYProgress, [0.3, 0.7], [0, 24]);
 
-  const smoothScrollY = useSpring(0, { stiffness: 120, damping: 22 });
-
   useEffect(() => {
     if (!scrollRef.current) return;
 
-    const handleScroll = () => {
+    const updateLineStates = () => {
       if (!scrollRef.current) return;
-      const scrollTop = window.scrollY;
-      const container = containerRef.current;
-      if (!container) return;
+      const rect = scrollRef.current.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const lines = scrollRef.current.querySelectorAll("[data-line]");
 
-      const containerTop = container.offsetTop;
-      const containerHeight = container.offsetHeight;
-      const viewportHeight = window.innerHeight;
-      
-      const relativeScroll = scrollTop - containerTop + viewportHeight / 2;
-      smoothScrollY.set(relativeScroll);
-
-      // Calculate active line
-      const lineElements = scrollRef.current.querySelectorAll("[data-line]");
-      lineElements.forEach((el, index) => {
-        const rect = el.getBoundingClientRect();
-        const center = viewportHeight / 2;
-        const distance = Math.abs(rect.top + rect.height / 2 - center);
+      lines.forEach((ln) => {
+        const r = ln.getBoundingClientRect();
+        const dist = Math.abs(r.top + r.height / 2 - center);
         
-        if (distance < viewportHeight * 0.14) {
-          setActiveLine(index);
+        ln.classList.remove("line-active", "line-semi");
+        if (dist < rect.height * 0.14) {
+          ln.classList.add("line-active");
+        } else if (dist < rect.height * 0.24) {
+          ln.classList.add("line-semi");
         }
       });
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [smoothScrollY]);
+    const handleWheel = (e: WheelEvent) => {
+      const el = scrollRef.current;
+      if (!el) return;
+      
+      const atTop = el.scrollTop === 0 && e.deltaY < 0;
+      const atBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight && e.deltaY > 0;
+      
+      if (!atTop && !atBottom) {
+        e.stopPropagation();
+      }
+    };
+
+    const el = scrollRef.current;
+    el.addEventListener("scroll", updateLineStates, { passive: true });
+    el.addEventListener("wheel", handleWheel);
+    updateLineStates();
+
+    return () => {
+      el.removeEventListener("scroll", updateLineStates);
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   return (
     <section
@@ -96,7 +105,7 @@ export const Story = () => {
             />
 
             {/* Reading window with masks */}
-            <div className="relative h-[60vh] overflow-hidden">
+            <div className="relative h-[60vh]">
               {/* Top gradient mask */}
               <div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-light-bg to-transparent z-10 pointer-events-none" />
               
@@ -106,38 +115,24 @@ export const Story = () => {
               {/* Text content */}
               <div
                 ref={scrollRef}
-                className="absolute inset-0 flex flex-col justify-center items-start space-y-8 px-4"
+                className="h-full overflow-y-auto will-change-scroll px-4 py-[30vh] space-y-8"
               >
-                {storyLines.map((line, index) => {
-                  const isActive = index === activeLine;
-                  const isNearby = Math.abs(index - activeLine) <= 1;
-                  
-                  return (
-                    <motion.p
-                      key={index}
-                      data-line={index}
-                      className="text-xl md:text-2xl font-sans leading-relaxed transition-all duration-220"
-                      style={{
-                        color: isActive 
-                          ? "hsl(var(--dark-text))"
-                          : isNearby
-                          ? "rgba(10, 10, 10, 0.5)"
-                          : "rgba(10, 10, 10, 0.18)",
-                        transform: isActive ? "translateY(0)" : "translateY(8px)",
-                        textShadow: !isActive ? "0 0 0.5px rgba(10, 10, 10, 0.3)" : "none",
-                      }}
-                    >
-                      {line || "\u00A0"}
-                    </motion.p>
-                  );
-                })}
+                {storyLines.map((line, index) => (
+                  <p
+                    key={index}
+                    data-line={index}
+                    className="text-xl md:text-2xl font-sans leading-relaxed"
+                  >
+                    {line || "\u00A0"}
+                  </p>
+                ))}
               </div>
 
               {/* L3: Coral accent rule */}
               <motion.div
                 data-depth="0.5"
                 style={{ y: coralRuleY }}
-                className="absolute right-0 top-[45%] w-6 md:w-12 h-px bg-coral opacity-30"
+                className="absolute right-0 top-[45%] w-6 md:w-12 h-px bg-coral opacity-30 pointer-events-none"
               />
             </div>
           </div>

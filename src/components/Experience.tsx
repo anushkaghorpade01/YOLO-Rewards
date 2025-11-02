@@ -7,6 +7,7 @@ import { BookmarkModal } from "./BookmarkModal";
 export const Experience = () => {
   const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<string[]>([]);
   const [showBookmark, setShowBookmark] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const { toast } = useToast();
@@ -18,29 +19,34 @@ export const Experience = () => {
 
   const handleLike = async () => {
     setLiked(!liked);
-    // In real app: increment Supabase likes table
     if (!liked) {
-      toast({
-        description: "Liked!",
-      });
+      toast({ description: "Liked!" });
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = "https://www.flent.in/?utm_source=YOLO%20Site&utm_medium=website&utm_campaign=YOLO";
+    const text = "Check out Flent Homes — fully furnished ready-to-move homes.";
     
     if (navigator.share) {
-      navigator.share({
-        title: "YOLO by Flent",
-        text: "Check out YOLO by Flent - Refer and win!",
-        url: url,
-      });
-    } else {
-      navigator.clipboard.writeText(url);
-      toast({
-        description: "Link copied to clipboard!",
-      });
+      try {
+        await navigator.share({ title: "YOLO by Flent", text, url });
+        return;
+      } catch {}
     }
+
+    // Fallback: open WhatsApp
+    const wa = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ description: "Link copied! Opening share options..." });
+    } catch {}
+    window.open(wa, "_blank");
+  };
+
+  const addComment = (text: string) => {
+    setComments((prev) => [...prev, text]);
+    setShowComments(false);
   };
 
   const slides = [
@@ -113,9 +119,12 @@ export const Experience = () => {
         <motion.div
           data-depth="0.3"
           style={{ y: frameY }}
-          className="relative w-full max-w-md mx-auto px-6"
+          className="relative w-full px-6"
         >
-          <div className="bg-dark-bg border border-light-text/20 rounded-card overflow-hidden shadow-elegant">
+          <div
+            className="mx-auto rounded-[24px] border border-light-text/10 bg-black"
+            style={{ width: "min(92vw, 420px)", aspectRatio: "4 / 5", overflow: "hidden" }}
+          >
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-light-text/10">
               <div className="w-10 h-10 rounded-full bg-coral flex items-center justify-center">
@@ -128,11 +137,11 @@ export const Experience = () => {
             </div>
 
             {/* Slides */}
-            <div className="relative aspect-square bg-dark-bg">
+            <div className="relative" style={{ height: "calc(100% - 128px)" }}>
               {slides[currentSlide].content}
               
               {/* Slide indicators */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
                 {slides.map((_, index) => (
                   <button
                     key={index}
@@ -148,7 +157,7 @@ export const Experience = () => {
               {currentSlide > 0 && (
                 <button
                   onClick={() => setCurrentSlide(currentSlide - 1)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform z-10"
                 >
                   ‹
                 </button>
@@ -156,7 +165,7 @@ export const Experience = () => {
               {currentSlide < slides.length - 1 && (
                 <button
                   onClick={() => setCurrentSlide(currentSlide + 1)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform z-10"
                 >
                   ›
                 </button>
@@ -169,50 +178,49 @@ export const Experience = () => {
               style={{ y: iconsY }}
               className="flex items-center gap-4 p-4 border-t border-light-text/10"
             >
-              <button
-                onClick={handleLike}
-                className="hover:scale-110 transition-transform"
-              >
-                <Heart
-                  className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-light-text"}`}
-                />
+              <button onClick={handleLike} className="hover:scale-110 transition-transform">
+                <Heart className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-light-text"}`} />
               </button>
-              <button
-                onClick={() => setShowComments(!showComments)}
-                className="hover:scale-110 transition-transform"
-              >
+              <button onClick={() => setShowComments(!showComments)} className="hover:scale-110 transition-transform">
                 <MessageCircle className="w-7 h-7 text-light-text" />
               </button>
-              <button
-                onClick={handleShare}
-                className="hover:scale-110 transition-transform"
-              >
+              <button onClick={handleShare} className="hover:scale-110 transition-transform">
                 <Send className="w-7 h-7 text-light-text" />
               </button>
-              <button
-                onClick={() => setShowBookmark(true)}
-                className="ml-auto hover:scale-110 transition-transform"
-              >
+              <button onClick={() => setShowBookmark(true)} className="ml-auto hover:scale-110 transition-transform">
                 <Bookmark className="w-7 h-7 text-light-text" />
               </button>
             </motion.div>
-
-            {/* Comments */}
-            {showComments && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                className="border-t border-light-text/10 p-4 space-y-3"
-              >
-                <button className="w-full text-left px-4 py-2 bg-light-text/5 rounded-lg text-light-text/80 hover:bg-light-text/10 transition-colors font-sans">
-                  Here to win 🏆
-                </button>
-                <button className="w-full text-left px-4 py-2 bg-light-text/5 rounded-lg text-light-text/80 hover:bg-light-text/10 transition-colors font-sans">
-                  🐐
-                </button>
-              </motion.div>
-            )}
           </div>
+
+          {/* Comment quick-replies sheet */}
+          {showComments && (
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-light-bg text-dark-text rounded-xl shadow-lg p-3 flex gap-2 z-20">
+              <button
+                onClick={() => addComment("Here to win 🏆")}
+                className="px-4 py-2 bg-dark-text/5 hover:bg-dark-text/10 rounded-lg font-sans text-sm transition-colors"
+              >
+                Here to win 🏆
+              </button>
+              <button
+                onClick={() => addComment("🐐")}
+                className="px-4 py-2 bg-dark-text/5 hover:bg-dark-text/10 rounded-lg font-sans text-sm transition-colors"
+              >
+                🐐
+              </button>
+            </div>
+          )}
+
+          {/* Comments list */}
+          {comments.length > 0 && (
+            <div className="mt-3 px-4">
+              <ul className="space-y-1 text-sm text-light-text/90">
+                {comments.map((c, i) => (
+                  <li key={i} className="font-sans">{c}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </motion.div>
       </section>
 

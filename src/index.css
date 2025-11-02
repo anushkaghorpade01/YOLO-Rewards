@@ -122,4 +122,41 @@ All colors MUST be HSL.
     letter-spacing: -0.01em;
     line-height: 1.1;
   }
+  
+  /* Flip animations for Pre-hero */
+  @keyframes flipOut {
+    0% { transform: rotateX(0); opacity: 1; }
+    100% { transform: rotateX(90deg); opacity: 0; }
+  }
+
+  @keyframes flipIn {
+    0% { transform: rotateX(-90deg); opacity: 0; }
+    100% { transform: rotateX(0); opacity: 1; }
+  }
+
+  .flip-out {
+    animation: flipOut 450ms 800ms both ease-out;
+  }
+
+  .flip-in {
+    animation: flipIn 450ms 1250ms both ease-out;
+  }
+
+  /* Teleprompter line states */
+  [data-line] {
+    color: rgba(10, 10, 10, 0.18);
+    transform: translateY(8px);
+    transition: color 0.22s ease-out, transform 0.18s ease-out;
+    text-shadow: 0 0 0.5px rgba(10, 10, 10, 0.3);
+  }
+
+  [data-line].line-semi {
+    color: rgba(10, 10, 10, 0.5);
+  }
+
+  [data-line].line-active {
+    color: #0A0A0A;
+    transform: translateY(0);
+    text-shadow: none;
+  }
 }
