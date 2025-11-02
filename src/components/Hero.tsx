@@ -108,15 +108,17 @@ export const Hero = () => {
               transform: "translateY(-0.05em)"
             }}
           />
-          {/* smaller parachute - starts visible */}
+          {/* parachute - starts high above */}
           <ParachuteIcon
             ref={chuteRef}
-            className="absolute left-1/2 -translate-x-1/2 pointer-events-none opacity-100"
+            className="absolute pointer-events-none"
             style={{
-              top: "-38svh",
+              left: "100%",
+              top: "0",
               width: "64px",
               color: "#FFFFFF",
               zIndex: 3,
+              transform: "translate(-50%, -38svh)",
             }}
           />
         </p>
@@ -146,34 +148,34 @@ export const Hero = () => {
 
 /* ---------- animation ---------- */
 function runParachute(chute: Element, dot: HTMLElement) {
-  // Realistic parachute fall with S-curve swaying motion (3+ seconds)
+  // Realistic parachute fall with S-curve swaying motion (3.5+ seconds)
   const fall = chute.animate(
     [
       { transform: "translate(-50%, -38svh) rotate(0deg)", offset: 0 },
-      { transform: "translate(-40%, -32svh) rotate(8deg)", offset: 0.15 },
-      { transform: "translate(-35%, -26svh) rotate(12deg)", offset: 0.25 },
-      { transform: "translate(-42%, -20svh) rotate(6deg)", offset: 0.35 },
-      { transform: "translate(-52%, -15svh) rotate(-4deg)", offset: 0.45 },
-      { transform: "translate(-60%, -10svh) rotate(-10deg)", offset: 0.55 },
-      { transform: "translate(-58%, -6svh) rotate(-8deg)", offset: 0.65 },
-      { transform: "translate(-52%, -3svh) rotate(-3deg)", offset: 0.80 },
-      { transform: "translate(-48%, -1svh) rotate(2deg)", offset: 0.90 },
-      { transform: "translate(-50%, 0) rotate(0deg)", offset: 1 }
+      { transform: "translate(-35%, -32svh) rotate(10deg)", offset: 0.12 },
+      { transform: "translate(-25%, -26svh) rotate(15deg)", offset: 0.22 },
+      { transform: "translate(-30%, -20svh) rotate(8deg)", offset: 0.32 },
+      { transform: "translate(-45%, -15svh) rotate(-5deg)", offset: 0.42 },
+      { transform: "translate(-60%, -10svh) rotate(-12deg)", offset: 0.55 },
+      { transform: "translate(-70%, -6svh) rotate(-15deg)", offset: 0.68 },
+      { transform: "translate(-62%, -3svh) rotate(-8deg)", offset: 0.80 },
+      { transform: "translate(-52%, -1svh) rotate(-2deg)", offset: 0.92 },
+      { transform: "translate(-50%, 0svh) rotate(0deg)", offset: 1 }
     ],
-    { duration: 3500, easing: "ease-in-out", fill: "forwards" }
+    { duration: 3800, easing: "ease-in-out", fill: "forwards" }
   );
 
   fall.finished.then(() => {
-    // Settle animation
+    // Gentle settle
     chute
       .animate(
         [
           { transform: "translate(-50%, 0) rotate(0deg)" },
-          { transform: "translate(calc(-50% - 3px), 0) rotate(-3deg)" },
-          { transform: "translate(calc(-50% + 2px), 0) rotate(2deg)" },
+          { transform: "translate(-52%, 0) rotate(-2deg)" },
+          { transform: "translate(-48%, 0) rotate(1deg)" },
           { transform: "translate(-50%, 0) rotate(0deg)" }
         ],
-        { duration: 500, easing: "ease-out", fill: "forwards" }
+        { duration: 600, easing: "ease-out", fill: "forwards" }
       )
       .finished.then(() => morphToPeriod(chute as HTMLElement, dot));
   });
