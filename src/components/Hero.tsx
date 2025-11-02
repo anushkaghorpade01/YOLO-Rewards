@@ -146,29 +146,34 @@ export const Hero = () => {
 
 /* ---------- animation ---------- */
 function runParachute(chute: Element, dot: HTMLElement) {
-  // fall + gentle sway (visible the whole way) - 3+ seconds
+  // Realistic parachute fall with S-curve swaying motion (3+ seconds)
   const fall = chute.animate(
     [
-      { transform: "translate(-50%, -38svh) rotate(0deg)" },
-      { transform: "translate(-48%, -28svh) rotate(5deg)" },
-      { transform: "translate(-52%, -18svh) rotate(-4deg)" },
-      { transform: "translate(-48%, -8svh) rotate(3deg)" },
-      { transform: "translate(-51%, -2svh) rotate(-2deg)" },
-      { transform: "translate(-50%, 0) rotate(0deg)" }
+      { transform: "translate(-50%, -38svh) rotate(0deg)", offset: 0 },
+      { transform: "translate(-40%, -32svh) rotate(8deg)", offset: 0.15 },
+      { transform: "translate(-35%, -26svh) rotate(12deg)", offset: 0.25 },
+      { transform: "translate(-42%, -20svh) rotate(6deg)", offset: 0.35 },
+      { transform: "translate(-52%, -15svh) rotate(-4deg)", offset: 0.45 },
+      { transform: "translate(-60%, -10svh) rotate(-10deg)", offset: 0.55 },
+      { transform: "translate(-58%, -6svh) rotate(-8deg)", offset: 0.65 },
+      { transform: "translate(-52%, -3svh) rotate(-3deg)", offset: 0.80 },
+      { transform: "translate(-48%, -1svh) rotate(2deg)", offset: 0.90 },
+      { transform: "translate(-50%, 0) rotate(0deg)", offset: 1 }
     ],
-    { duration: 3200, easing: "cubic-bezier(.22,.84,.36,1)", fill: "forwards" }
+    { duration: 3500, easing: "ease-in-out", fill: "forwards" }
   );
 
   fall.finished.then(() => {
+    // Settle animation
     chute
       .animate(
         [
           { transform: "translate(-50%, 0) rotate(0deg)" },
-          { transform: "translate(calc(-50% - 2px), 0) rotate(-2deg)" },
-          { transform: "translate(calc(-50% + 2px), 0) rotate(1.5deg)" },
+          { transform: "translate(calc(-50% - 3px), 0) rotate(-3deg)" },
+          { transform: "translate(calc(-50% + 2px), 0) rotate(2deg)" },
           { transform: "translate(-50%, 0) rotate(0deg)" }
         ],
-        { duration: 450, easing: "ease-out", fill: "forwards" }
+        { duration: 500, easing: "ease-out", fill: "forwards" }
       )
       .finished.then(() => morphToPeriod(chute as HTMLElement, dot));
   });
