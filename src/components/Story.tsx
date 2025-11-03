@@ -106,9 +106,9 @@ const StoryStepper = () => {
           <div className="max-h-[66vh] overflow-visible pr-4">
             <p 
               ref={textRef}
-              className="text-[clamp(20px,2.2vw,34px)] whitespace-pre-wrap text-dark-text"
+              className="text-[clamp(20px,2.2vw,34px)] whitespace-pre-line text-dark-text"
               style={{ 
-                lineHeight: '1.6',
+                lineHeight: '1.5',
                 fontWeight: 400
               }}
             >
