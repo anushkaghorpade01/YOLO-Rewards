@@ -15,23 +15,23 @@ const StoryStepper = () => {
   useEffect(() => {
     if (!textRef.current || !wrapperRef.current || !containerRef.current) return;
 
-    // Split text into characters
-    const splitText = new SplitType(textRef.current, { types: "chars" });
-    const chars = splitText.chars;
+    // Split text into words instead of characters to prevent word breaks
+    const splitText = new SplitType(textRef.current, { types: "words" });
+    const words = splitText.words;
 
-    if (!chars) return;
+    if (!words) return;
 
-    const totalChars = chars.length;
-    const chunkSize = Math.ceil(totalChars * 0.3); // 30% per scroll
+    const totalWords = words.length;
+    const chunkSize = Math.ceil(totalWords * 0.2); // 20% per scroll
 
     // Set initial state - first chunk visible and being filled
-    gsap.set(chars, { 
+    gsap.set(words, { 
       opacity: 0,
       visibility: "hidden"
     });
     
     // Show first chunk as ghost from the start
-    gsap.set(chars.slice(0, chunkSize), {
+    gsap.set(words.slice(0, chunkSize), {
       opacity: 0.15,
       visibility: "visible"
     });
@@ -45,26 +45,26 @@ const StoryStepper = () => {
       pin: false,
       onUpdate: (self) => {
         const progress = self.progress;
-        const revealedCount = Math.floor(progress * totalChars);
-        const nextChunkEnd = Math.min(revealedCount + chunkSize, totalChars);
+        const revealedCount = Math.floor(progress * totalWords);
+        const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
         
         // Move text up smoothly - increased distance for more visible effect
         const translateY = -(progress * 150);
         gsap.set(wrapperRef.current, { y: `${translateY}%` });
         
         // Show next chunk as ghost
-        chars.slice(0, nextChunkEnd).forEach(char => {
-          gsap.set(char, { visibility: "visible" });
+        words.slice(0, nextChunkEnd).forEach(word => {
+          gsap.set(word, { visibility: "visible" });
         });
         
-        // Fill revealed characters
-        chars.slice(0, revealedCount).forEach(char => {
-          gsap.set(char, { opacity: 1 });
+        // Fill revealed words
+        words.slice(0, revealedCount).forEach(word => {
+          gsap.set(word, { opacity: 1 });
         });
         
-        // Ghost for upcoming characters
-        chars.slice(revealedCount, nextChunkEnd).forEach(char => {
-          gsap.set(char, { opacity: 0.15 });
+        // Ghost for upcoming words
+        words.slice(revealedCount, nextChunkEnd).forEach(word => {
+          gsap.set(word, { opacity: 0.15 });
         });
       }
     });
@@ -91,12 +91,9 @@ const StoryStepper = () => {
                   key={idx}
                   className="relative mb-6 text-dark-text"
                   style={{
-                    fontSize: 'clamp(14px, 1.6vw, 24px)',
+                    fontSize: 'clamp(18px, 2.4vw, 36px)',
                     lineHeight: '1.55',
-                    letterSpacing: '0.005em',
-                    wordBreak: 'keep-all',
-                    overflowWrap: 'normal',
-                    hyphens: 'none'
+                    letterSpacing: '0.005em'
                   }}
                   dangerouslySetInnerHTML={{ __html: p.html }}
                 />
