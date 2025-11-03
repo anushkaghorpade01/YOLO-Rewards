@@ -77,17 +77,18 @@ export const AnimatedRoute = () => {
             2
           </text>
           <text
-            x="180"
-            y="195"
+            x="170"
+            y="185"
             fill="#0A0A0A"
-            fontSize="14"
+            fontSize="13"
             fontFamily="Plus Jakarta Sans, sans-serif"
             className="select-none"
           >
-            <tspan x="180" dy="0">When they book, they'll</tspan>
-            <tspan x="180" dy="18">include your <tspan fontWeight="700">name</tspan> and</tspan>
-            <tspan x="180" dy="18"><tspan fontWeight="700">number</tspan> in the onboarding</tspan>
-            <tspan x="180" dy="18">form.</tspan>
+            <tspan x="170" dy="0">When they book,</tspan>
+            <tspan x="170" dy="16">they'll include your</tspan>
+            <tspan x="170" dy="16"><tspan fontWeight="700">name</tspan> and <tspan fontWeight="700">number</tspan></tspan>
+            <tspan x="170" dy="16">in the onboarding</tspan>
+            <tspan x="170" dy="16">form.</tspan>
           </text>
         </g>
 
