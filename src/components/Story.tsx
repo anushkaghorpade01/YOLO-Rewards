@@ -48,8 +48,8 @@ const StoryStepper = () => {
         const revealedCount = Math.floor(progress * totalWords);
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
         
-        // Move text up - start at +50% so first line is lower, then move up
-        const translateY = 50 - (progress * 190);
+        // Move text up - start very low so first line "Refer and earn..." is visible
+        const translateY = 100 - (progress * 240);
         gsap.set(wrapperRef.current, { y: `${translateY}%`, force3D: true });
         
         // Show next chunk as ghost
