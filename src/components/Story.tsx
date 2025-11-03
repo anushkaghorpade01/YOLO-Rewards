@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,23 +11,6 @@ const StoryStepper = () => {
   const textRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [allDone, setAllDone] = useState(false);
-
-  // Scroll lock until animation completes
-  useEffect(() => {
-    const lock = (e: WheelEvent) => e.preventDefault();
-    if (!allDone) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("wheel", lock, { passive: false });
-    } else {
-      document.body.style.overflow = "";
-      window.removeEventListener("wheel", lock);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("wheel", lock);
-    };
-  }, [allDone]);
 
   useEffect(() => {
     if (!textRef.current || !wrapperRef.current || !containerRef.current) return;
@@ -65,11 +48,6 @@ const StoryStepper = () => {
         const revealedCount = Math.floor(progress * totalChars);
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalChars);
         
-        // Check if animation is complete
-        if (progress >= 0.99 && !allDone) {
-          setAllDone(true);
-        }
-        
         // Move text up smoothly
         const translateY = -(progress * 30);
         gsap.set(wrapperRef.current, { y: translateY });
@@ -95,7 +73,7 @@ const StoryStepper = () => {
       scrollTrigger.kill();
       splitText.revert();
     };
-  }, [allDone, setAllDone]);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-[200vh]">
