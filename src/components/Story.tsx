@@ -7,9 +7,12 @@ import { PARAGRAPHS } from "@/data/storyCopy";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// LOCKED VALUES - DO NOT CHANGE
-const STORY_START_POSITION = 97; // Starting position percentage
-const STORY_MOVEMENT_RANGE = 220; // Total movement range percentage
+// ⚠️ CRITICAL: LOCKED VALUES - NEVER CHANGE THESE ⚠️
+// These values MUST remain at 97% and 220% permanently
+// Any changes to these values should be immediately reverted
+const STORY_START_POSITION = 97; // Starting position percentage - LOCKED
+const STORY_MOVEMENT_RANGE = 220; // Total movement range percentage - LOCKED
+// ⚠️ END LOCKED VALUES ⚠️
 
 const StoryStepper = () => {
   const textRef = useRef<HTMLDivElement>(null);
