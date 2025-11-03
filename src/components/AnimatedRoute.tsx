@@ -78,13 +78,16 @@ export const AnimatedRoute = () => {
           </text>
           <text
             x="180"
-            y="205"
+            y="195"
             fill="#0A0A0A"
             fontSize="14"
             fontFamily="Plus Jakarta Sans, sans-serif"
             className="select-none"
           >
-            When they book, they'll include your <tspan fontWeight="700">name</tspan> and <tspan fontWeight="700">number</tspan> in the onboarding form.
+            <tspan x="180" dy="0">When they book, they'll</tspan>
+            <tspan x="180" dy="18">include your <tspan fontWeight="700">name</tspan> and</tspan>
+            <tspan x="180" dy="18"><tspan fontWeight="700">number</tspan> in the onboarding</tspan>
+            <tspan x="180" dy="18">form.</tspan>
           </text>
         </g>
 
