@@ -61,21 +61,20 @@ const StoryStepper = () => {
     }
   };
 
-  /** Intercept scroll/keys/touch to control animation */
+  /** Intercept scroll/keys/touch to control animation - only when not done */
   useEffect(() => {
+    // If animation is complete, don't attach any listeners
+    if (allDone) return;
+
     const vp = viewportRef.current;
     if (!vp) return;
 
     const onWheel = (e: WheelEvent) => {
-      // Only intercept scroll if animation not done
-      if (!allDone) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.deltaY > 0) {
-          handleNext();
-        }
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.deltaY > 0) {
+        handleNext();
       }
-      // When allDone, let scroll pass through naturally
     };
 
     let touchStartY = 0;
@@ -84,23 +83,19 @@ const StoryStepper = () => {
     };
     
     const onTouchMove = (e: TouchEvent) => {
-      if (!allDone) {
-        const dy = touchStartY - e.touches[0].clientY;
-        if (Math.abs(dy) > 10 && dy > 0) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleNext();
-          touchStartY = e.touches[0].clientY;
-        }
+      const dy = touchStartY - e.touches[0].clientY;
+      if (Math.abs(dy) > 10 && dy > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleNext();
+        touchStartY = e.touches[0].clientY;
       }
     };
 
     const onKey = (e: KeyboardEvent) => {
       if (["ArrowDown", "PageDown", " "].includes(e.key)) {
-        if (!allDone) {
-          e.preventDefault();
-          handleNext();
-        }
+        e.preventDefault();
+        handleNext();
       }
     };
 
