@@ -145,8 +145,8 @@ const StoryStepper = () => {
   return (
     <div className="relative">
       {/* top/bottom fades */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[18vh] bg-gradient-to-b from-white to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[18vh] bg-gradient-to-t from-white to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[18vh] bg-gradient-to-b from-light-bg to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[18vh] bg-gradient-to-t from-light-bg to-transparent z-10" />
 
       {/* viewport */}
       <div ref={viewportRef} className="max-h-[66vh] overflow-hidden pr-4">
@@ -159,6 +159,8 @@ const StoryStepper = () => {
             const isBlank = text.trim() === "";
             const isOn = filled[idx];
             const chunks = CHUNK_PATTERN[idx % CHUNK_PATTERN.length];
+            // Only show lines that are filled or within 3 lines of current index
+            const isVisible = isOn || (idx >= i - 1 && idx <= i + 2);
 
             return (
               <div
@@ -167,7 +169,9 @@ const StoryStepper = () => {
                 className="relative h-[3.2rem] flex items-center"
                 style={{
                   transform: isOn ? "translateY(0)" : "translateY(2px)",
-                  filter: isOn ? "none" : "blur(0.1px)", // tiny hover feel
+                  filter: isOn ? "none" : "blur(0.1px)",
+                  opacity: isVisible ? 1 : 0,
+                  visibility: isVisible ? "visible" : "hidden",
                 }}
               >
                 {/* ghost layer */}
