@@ -39,7 +39,7 @@ const StoryStepper = () => {
     // Create smooth scroll-triggered animation - completes when section ends
     const scrollTrigger = ScrollTrigger.create({
       trigger: containerRef.current,
-      start: "top top",
+      start: "top top+=10",
       end: "bottom bottom",
       scrub: 0.5,
       pin: false,
