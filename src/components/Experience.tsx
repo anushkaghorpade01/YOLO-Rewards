@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookmarkModal } from "./BookmarkModal";
+import flentLogo from "@/assets/flent-logo.png";
 
 export const Experience = () => {
   const [liked, setLiked] = useState(false);
@@ -135,8 +136,8 @@ export const Experience = () => {
           >
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-dark-text/10">
-              <div className="w-10 h-10 rounded-full bg-coral flex items-center justify-center">
-                <span className="text-light-text font-bold text-sm">F</span>
+              <div className="w-10 h-10 rounded-full bg-white border border-dark-text/10 flex items-center justify-center overflow-hidden">
+                <img src={flentLogo} alt="Flent" className="w-full h-full object-cover" />
               </div>
               <div>
                 <p className="font-sans font-semibold text-dark-text text-sm">flent.in</p>
@@ -203,7 +204,7 @@ export const Experience = () => {
 
           {/* Comment quick-replies sheet */}
           {showComments && (
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-light-bg text-dark-text rounded-xl shadow-lg p-3 flex gap-2 z-20">
+            <div className="mt-4 bg-light-bg text-dark-text rounded-xl shadow-lg p-3 flex gap-2 z-20 mx-auto" style={{ width: "min(92vw, 420px)" }}>
               <button
                 onClick={() => addComment("Here to win 🏆")}
                 className="px-4 py-2 bg-dark-text/5 hover:bg-dark-text/10 rounded-lg font-sans text-sm transition-colors"
@@ -221,7 +222,7 @@ export const Experience = () => {
 
           {/* Comments list */}
           {comments.length > 0 && (
-            <div className="mt-3 px-4">
+            <div className="mt-3 mx-auto" style={{ width: "min(92vw, 420px)" }}>
               <ul className="space-y-1 text-sm text-light-text/90">
                 {comments.map((c, i) => (
                   <li key={i} className="font-sans">{c}</li>
