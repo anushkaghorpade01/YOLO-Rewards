@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,26 +11,9 @@ const StoryStepper = () => {
   const textRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isFullyVisible, setIsFullyVisible] = useState(false);
-
-  // Check if Story section is 100% visible
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Only activate when section is fully visible (≥99% to account for subpixel rendering)
-        setIsFullyVisible(entry.isIntersecting && entry.intersectionRatio >= 0.99);
-      },
-      { threshold: Array.from({ length: 100 }, (_, i) => i / 100) }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
-    if (!textRef.current || !wrapperRef.current || !containerRef.current || !isFullyVisible) return;
+    if (!textRef.current || !wrapperRef.current || !containerRef.current) return;
 
     // Split text into characters
     const splitText = new SplitType(textRef.current, { types: "chars" });
@@ -53,7 +36,7 @@ const StoryStepper = () => {
       visibility: "visible"
     });
 
-    // Create smooth scroll-triggered animation
+    // Create smooth scroll-triggered animation - starts when section reaches top
     const scrollTrigger = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top top",
@@ -61,8 +44,6 @@ const StoryStepper = () => {
       scrub: 0.5,
       pin: false,
       onUpdate: (self) => {
-        if (!isFullyVisible) return; // Only animate when fully visible
-        
         const progress = self.progress;
         const revealedCount = Math.floor(progress * totalChars);
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalChars);
@@ -92,7 +73,7 @@ const StoryStepper = () => {
       scrollTrigger.kill();
       splitText.revert();
     };
-  }, [isFullyVisible]);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-[200vh]">
