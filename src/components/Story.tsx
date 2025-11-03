@@ -36,15 +36,17 @@ const StoryStepper = () => {
       visibility: "visible"
     });
 
-    // Create smooth scroll-triggered animation - completes when section ends
+    // Create smooth scroll-triggered animation - starts only when fully visible
     const scrollTrigger = ScrollTrigger.create({
       trigger: containerRef.current,
-      start: "top top+=10",
+      start: "top top",
       end: "bottom bottom",
       scrub: 0.5,
       pin: false,
       onUpdate: (self) => {
-        const progress = self.progress;
+        // Only animate after section is fully visible (first 5% of scroll is buffer)
+        const adjustedProgress = Math.max(0, (self.progress - 0.05) / 0.95);
+        const progress = adjustedProgress;
         const revealedCount = Math.floor(progress * totalWords);
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
         
