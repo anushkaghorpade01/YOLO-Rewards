@@ -38,25 +38,26 @@ const StoryStepper = () => {
 
     const totalChars = chars.length;
     const chunkSize = Math.ceil(totalChars * 0.3); // 30% per scroll
+    let isComplete = false;
 
-    // Set initial state - all hidden except first chunk
+    // Set initial state - first chunk visible and being filled
     gsap.set(chars, { 
       opacity: 0,
       visibility: "hidden"
     });
     
-    // Show first chunk as ghost
+    // Show first chunk as ghost and make visible from start
     gsap.set(chars.slice(0, chunkSize), {
       opacity: 0.15,
       visibility: "visible"
     });
 
-    // Create scroll-triggered animation with longer duration
+    // Create scroll-triggered animation
     const scrollTrigger = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top center",
-      end: "+=5000", // Longer scroll distance
-      scrub: 1, // Smoother scrubbing
+      end: "+=5000",
+      scrub: 1,
       pin: false,
       onUpdate: (self) => {
         const progress = self.progress;
@@ -64,27 +65,49 @@ const StoryStepper = () => {
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalChars);
         
         // Move text up as we progress
-        const translateY = -(progress * 30); // Move up 30vh total
-        gsap.to(wrapperRef.current, { y: translateY, duration: 0.1, ease: "none" });
+        const translateY = -(progress * 30);
+        gsap.set(wrapperRef.current, { y: translateY });
         
         // Show next chunk as ghost
         chars.slice(0, nextChunkEnd).forEach(char => {
-          gsap.to(char, { visibility: "visible", duration: 0 });
+          gsap.set(char, { visibility: "visible" });
         });
         
         // Fill revealed characters
         chars.slice(0, revealedCount).forEach(char => {
-          gsap.to(char, { opacity: 1, duration: 0.1 });
+          gsap.set(char, { opacity: 1 });
         });
         
         // Ghost for upcoming characters
         chars.slice(revealedCount, nextChunkEnd).forEach(char => {
-          gsap.to(char, { opacity: 0.15, duration: 0.1 });
+          gsap.set(char, { opacity: 0.15 });
         });
+
+        // Only mark complete when 100% done
+        isComplete = progress >= 0.99;
       }
     });
 
+    // Block scrolling to next section until story is complete
+    const blockScroll = (e: WheelEvent) => {
+      if (isComplete) return;
+
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      // Only block if we're actively viewing the Story section
+      const inView = rect.top <= window.innerHeight * 0.5 && rect.bottom >= window.innerHeight * 0.5;
+      
+      if (inView && e.deltaY > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('wheel', blockScroll, { passive: false });
+
     return () => {
+      window.removeEventListener('wheel', blockScroll);
       scrollTrigger.kill();
       splitText.revert();
     };
@@ -104,9 +127,10 @@ const StoryStepper = () => {
               ref={textRef}
               className="text-[clamp(20px,2.2vw,34px)] text-dark-text"
               style={{ 
-                lineHeight: '1.5',
+                lineHeight: '1.6',
                 fontWeight: 400,
-                whiteSpace: 'pre-line'
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'keep-all'
               }}
             >
               {COPY_TEXT}
