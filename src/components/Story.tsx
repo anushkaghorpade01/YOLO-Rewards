@@ -110,9 +110,12 @@ const StoryStepper = () => {
     };
   }, [allDone]);
 
-  /** Calculate vertical offset based on filled lines */
+  /** Calculate vertical offset to keep current line in view (scroll down effect) */
   const offset = useMemo(() => {
-    return `translateY(calc(${filledLines.size * -1} * 3.2rem))`;
+    // Keep first few lines at top, then start "scrolling down"
+    const scrollStart = 3; // Start scrolling after 3 lines
+    const scrollAmount = Math.max(0, filledLines.size - scrollStart);
+    return `translateY(calc(${scrollAmount * -1} * 3.2rem))`;
   }, [filledLines]);
 
   return (
@@ -132,7 +135,8 @@ const StoryStepper = () => {
             const isBlank = text.trim() === "";
             const isFilled = filledLines.has(idx);
             const isCurrent = idx === currentLine;
-            const isVisible = idx <= currentLine;
+            // Show lines within viewport range
+            const isVisible = idx >= Math.max(0, currentLine - 5) && idx <= currentLine + 3;
             
             // Calculate visible text for current line
             const visibleText = isCurrent && !isBlank 
