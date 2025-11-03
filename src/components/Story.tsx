@@ -57,21 +57,18 @@ const StoryStepper = () => {
           gsap.set(word, { visibility: "visible" });
         });
         
-        // Fill revealed words with full color
-        words.slice(0, revealedCount).forEach(word => {
-          gsap.set(word, { 
-            opacity: 1, 
-            color: 'hsl(0, 0%, 4%)',
-            visibility: "visible"
-          });
-          // Also set on child elements for HTML tags like <em>, <strong>
-          const children = word.querySelectorAll('*');
-          children.forEach(child => gsap.set(child, { opacity: 1, color: 'hsl(0, 0%, 4%)' }));
+        // Ghost for upcoming words FIRST
+        words.slice(revealedCount, nextChunkEnd).forEach(word => {
+          gsap.set(word, { opacity: 0.15, color: '' });
         });
         
-        // Ghost for upcoming words
-        words.slice(revealedCount, nextChunkEnd).forEach(word => {
-          gsap.set(word, { opacity: 0.15 });
+        // Fill revealed words LAST - with full opacity and color
+        words.slice(0, revealedCount).forEach(word => {
+          gsap.set(word, { 
+            opacity: 1,
+            visibility: "visible",
+            color: ''
+          });
         });
       }
     });
