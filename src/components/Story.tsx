@@ -38,6 +38,7 @@ const StoryStepper = () => {
 
     const totalChars = chars.length;
     const chunkSize = Math.ceil(totalChars * 0.3); // 30% per scroll
+    let isComplete = false;
 
     // Set initial state - all hidden except first chunk
     gsap.set(chars, { 
@@ -52,7 +53,7 @@ const StoryStepper = () => {
     });
 
     // Create scroll-triggered animation
-    ScrollTrigger.create({
+    const scrollTrigger = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top center",
       end: "+=4000",
@@ -81,15 +82,34 @@ const StoryStepper = () => {
         chars.slice(revealedCount, nextChunkEnd).forEach(char => {
           gsap.set(char, { opacity: 0.15 });
         });
+
+        // Mark as complete when done
+        isComplete = progress >= 0.99;
       }
     });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === containerRef.current) {
-          trigger.kill();
+    // Block scroll to next section until animation complete
+    const blockScroll = (e: WheelEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect || isComplete) return;
+
+      // Check if we're in the Story section
+      const inSection = rect.top <= window.innerHeight && rect.bottom >= 0;
+      
+      if (inSection && e.deltaY > 0) {
+        const progress = scrollTrigger.progress;
+        if (progress < 0.99) {
+          e.preventDefault();
+          e.stopPropagation();
         }
-      });
+      }
+    };
+
+    document.addEventListener('wheel', blockScroll, { passive: false });
+
+    return () => {
+      document.removeEventListener('wheel', blockScroll);
+      scrollTrigger.kill();
       splitText.revert();
     };
   }, []);
@@ -104,16 +124,17 @@ const StoryStepper = () => {
 
           {/* viewport */}
           <div className="max-h-[66vh] overflow-visible pr-4">
-            <p 
+            <div 
               ref={textRef}
-              className="text-[clamp(20px,2.2vw,34px)] whitespace-pre-line text-dark-text"
+              className="text-[clamp(20px,2.2vw,34px)] text-dark-text"
               style={{ 
                 lineHeight: '1.5',
-                fontWeight: 400
+                fontWeight: 400,
+                whiteSpace: 'pre-line'
               }}
             >
               {COPY_TEXT}
-            </p>
+            </div>
           </div>
         </div>
       </div>
