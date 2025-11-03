@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,8 +11,6 @@ const StoryStepper = () => {
   const textRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const isScrolling = useRef(false);
 
   useEffect(() => {
     if (!textRef.current || !wrapperRef.current || !containerRef.current) return;
@@ -38,63 +36,42 @@ const StoryStepper = () => {
       visibility: "visible"
     });
 
-    // Update animation based on scroll progress
-    const updateAnimation = (progress: number) => {
-      const revealedCount = Math.floor(progress * totalWords);
-      const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
-      
-      // Don't actually move text - just reveal it in place for the effect
-      
-      // Show next chunk as ghost
-      words.slice(0, nextChunkEnd).forEach(word => {
-        gsap.set(word, { visibility: "visible" });
-      });
-      
-      // Fill revealed words
-      words.slice(0, revealedCount).forEach(word => {
-        gsap.set(word, { opacity: 1 });
-      });
-      
-      // Ghost for upcoming words
-      words.slice(revealedCount, nextChunkEnd).forEach(word => {
-        gsap.set(word, { opacity: 0.15 });
-      });
-    };
-
-    // Handle wheel/touch events for independent scroll
-    const handleWheel = (e: WheelEvent) => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const isInView = rect.top <= 10 && rect.bottom >= window.innerHeight;
-
-      if (isInView) {
-        const currentProgress = scrollProgress;
+    // Create smooth scroll-triggered animation - text stays in place, just reveals
+    const scrollTrigger = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "top top",
+      end: "+=4000",
+      scrub: 0.5,
+      pin: false,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const revealedCount = Math.floor(progress * totalWords);
+        const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
         
-        // Only intercept if we're not done yet
-        if (currentProgress < 0.999) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // Slower scroll increment - fills 30% per several scrolls
-          const delta = e.deltaY > 0 ? 0.01 : -0.01;
-          setScrollProgress(prev => {
-            const newProgress = Math.max(0, Math.min(1, prev + delta));
-            updateAnimation(newProgress);
-            return newProgress;
-          });
-        }
+        // No movement - text stays in place
+        
+        // Show next chunk as ghost
+        words.slice(0, nextChunkEnd).forEach(word => {
+          gsap.set(word, { visibility: "visible" });
+        });
+        
+        // Fill revealed words
+        words.slice(0, revealedCount).forEach(word => {
+          gsap.set(word, { opacity: 1 });
+        });
+        
+        // Ghost for upcoming words
+        words.slice(revealedCount, nextChunkEnd).forEach(word => {
+          gsap.set(word, { opacity: 0.15 });
+        });
       }
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    });
 
     return () => {
-      window.removeEventListener("wheel", handleWheel as EventListener);
+      scrollTrigger.kill();
       splitText.revert();
     };
-  }, [scrollProgress]);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-[250vh]">
