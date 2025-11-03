@@ -24,7 +24,7 @@ const StoryStepper = () => {
     if (!words) return;
 
     const totalWords = words.length;
-    const chunkSize = Math.ceil(totalWords * 0.2); // 20% per scroll
+    const chunkSize = Math.ceil(totalWords * 0.3); // 30% per scroll
 
     // Set initial state - first chunk visible and being filled
     gsap.set(words, { 
@@ -75,17 +75,19 @@ const StoryStepper = () => {
         e.preventDefault();
         e.stopPropagation();
         
-        const delta = e.deltaY > 0 ? 0.02 : -0.02;
+        // Slower scroll increment - fills 30% per several scrolls
+        const delta = e.deltaY > 0 ? 0.008 : -0.008;
         setScrollProgress(prev => {
           const newProgress = Math.max(0, Math.min(1, prev + delta));
           updateAnimation(newProgress);
           
-          // Release scroll at the end
-          if (newProgress >= 1 && delta > 0) {
+          // Release scroll only when completely done
+          if (newProgress >= 0.999 && delta > 0) {
             isScrolling.current = true;
+            window.scrollBy({ top: 100, behavior: 'smooth' });
             setTimeout(() => {
               isScrolling.current = false;
-            }, 100);
+            }, 300);
             return 1;
           }
           
@@ -103,7 +105,7 @@ const StoryStepper = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative min-h-[200vh]">
+    <div ref={containerRef} className="relative min-h-[250vh]">
       <div className="sticky top-0 h-screen flex items-center">
         <div ref={wrapperRef} className="relative w-full">
           {/* top/bottom fades */}
@@ -151,7 +153,7 @@ export const Story = () => {
     <section
       id="story"
       ref={containerRef}
-      className="relative min-h-[200vh] bg-light-bg"
+      className="relative min-h-[250vh] bg-light-bg"
     >
       <div className="sticky top-0 h-screen flex items-center">
         <motion.div 
