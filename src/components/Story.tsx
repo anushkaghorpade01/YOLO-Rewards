@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-/** 1) Put your copy here as VISUAL LINES (short, readable). */
+/** Copy split into visual lines */
 const LINES = [
   `"Refer and earn up to this"`,
   `"Refer and earn up to that"`,
@@ -27,47 +27,111 @@ const LINES = [
   `the one I want you to have too.`
 ];
 
-/** 2) How many "blocks" fill across a line (for the chunked fill look) */
-const CHUNK_PATTERN = [3, 2, 1, 2, 3];
-
 const StoryStepper = () => {
   const viewportRef = useRef<HTMLDivElement>(null);
-
-  // index of the line we're filling NOW (0..len-1)
-  const [i, setI] = useState(0);
-  // a map of line index -> filled
-  const [filled, setFilled] = useState<boolean[]>(() => Array(LINES.length).fill(false));
+  const [currentLine, setCurrentLine] = useState(0);
+  const [filledLines, setFilledLines] = useState<Set<number>>(new Set());
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const lastIdx = LINES.length - 1;
-  const allDone = useMemo(() => filled.every(Boolean), [filled]);
+  const allDone = filledLines.size === LINES.length;
 
-  /** intercept scroll/keys/touch so the page won't advance until all lines filled */
+  /** Intercept scroll/keys/touch */
   useEffect(() => {
-    const vp = viewportRef.current!;
+    const vp = viewportRef.current;
+    if (!vp) return;
+
+    const handleNext = () => {
+      if (isAnimating) return;
+      if (currentLine >= LINES.length) return;
+      
+      setIsAnimating(true);
+      const line = LINES[currentLine];
+      
+      if (line.trim() === "") {
+        // Blank lines fill instantly
+        setFilledLines(prev => new Set([...prev, currentLine]));
+        setCurrentLine(prev => Math.min(LINES.length, prev + 1));
+        setTimeout(() => setIsAnimating(false), 100);
+      } else {
+        // Fill the line with animation
+        const row = document.querySelector(`[data-line="${currentLine}"]`) as HTMLElement;
+        if (row) {
+          const solid = row.querySelector(".line-solid") as HTMLElement;
+          if (solid) {
+            solid.style.transition = "clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+            solid.style.clipPath = "inset(0 0% 0 0)";
+            
+            setTimeout(() => {
+              setFilledLines(prev => new Set([...prev, currentLine]));
+              setCurrentLine(prev => Math.min(LINES.length, prev + 1));
+              setIsAnimating(false);
+            }, 400);
+          }
+        }
+      }
+    };
+
+    const handlePrev = () => {
+      if (isAnimating || currentLine === 0) return;
+      
+      const prevLine = currentLine - 1;
+      setIsAnimating(true);
+      
+      const row = document.querySelector(`[data-line="${prevLine}"]`) as HTMLElement;
+      if (row) {
+        const solid = row.querySelector(".line-solid") as HTMLElement;
+        if (solid) {
+          solid.style.transition = "clip-path 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+          solid.style.clipPath = "inset(0 100% 0 0)";
+        }
+      }
+      
+      setTimeout(() => {
+        setFilledLines(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(prevLine);
+          return newSet;
+        });
+        setCurrentLine(prevLine);
+        setIsAnimating(false);
+      }, 300);
+    };
+
     const onWheel = (e: WheelEvent) => {
       const down = e.deltaY > 0;
-      if (!allDone || (!down && i > 0)) {
-        e.preventDefault(); e.stopPropagation();
-        down ? next() : prev();
+      if (!allDone || (!down && currentLine > 0)) {
+        e.preventDefault();
+        e.stopPropagation();
+        down ? handleNext() : handlePrev();
       }
     };
-    let ts = 0;
-    const onTouchStart = (e: TouchEvent) => (ts = e.touches[0].clientY);
+
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => (touchStartY = e.touches[0].clientY);
     const onTouchMove = (e: TouchEvent) => {
-      const dy = ts - e.touches[0].clientY;
+      const dy = touchStartY - e.touches[0].clientY;
       if (Math.abs(dy) < 4) return;
       const down = dy > 0;
-      if (!allDone || (!down && i > 0)) {
-        e.preventDefault(); e.stopPropagation();
-        down ? next() : prev();
+      if (!allDone || (!down && currentLine > 0)) {
+        e.preventDefault();
+        e.stopPropagation();
+        down ? handleNext() : handlePrev();
       }
-      ts = e.touches[0].clientY;
+      touchStartY = e.touches[0].clientY;
     };
+
     const onKey = (e: KeyboardEvent) => {
-      if (["ArrowDown","PageDown"," "].includes(e.key)) {
-        if (!allDone) { e.preventDefault(); next(); }
-      } else if (["ArrowUp","PageUp"].includes(e.key)) {
-        if (i > 0) { e.preventDefault(); prev(); }
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+        if (!allDone) {
+          e.preventDefault();
+          handleNext();
+        }
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+        if (currentLine > 0) {
+          e.preventDefault();
+          handlePrev();
+        }
       }
     };
 
@@ -75,72 +139,19 @@ const StoryStepper = () => {
     vp.addEventListener("touchstart", onTouchStart, { passive: true });
     vp.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("keydown", onKey);
+
     return () => {
       vp.removeEventListener("wheel", onWheel as any);
       vp.removeEventListener("touchstart", onTouchStart as any);
       vp.removeEventListener("touchmove", onTouchMove as any);
       window.removeEventListener("keydown", onKey);
     };
-  }, [i, allDone]);
+  }, [currentLine, isAnimating, allDone]);
 
-  /** one step forward: fill the current line, then nudge content up to reveal the next line */
-  function next() {
-    if (i > lastIdx) return;
-    if (LINES[i].trim() === "") {
-      // spacer lines complete instantly
-      setFilled(v => { const n=[...v]; n[i]=true; return n; });
-      setI(v => Math.min(lastIdx+1, v+1));
-      return;
-    }
-    fillLine(i, () => {
-      setFilled(v => { const n=[...v]; n[i]=true; return n; });
-      setI(v => Math.min(lastIdx+1, v+1));
-    });
-  }
-
-  /** step back: un-fill previous line and nudge down */
-  function prev() {
-    if (i === 0) return;
-    const target = Math.max(0, i - 1);
-    if (!filled[target]) { setI(target); return; }
-    unfillLine(target, () => {
-      setFilled(v => { const n=[...v]; n[target]=false; return n; });
-      setI(target);
-    });
-  }
-
-  /** play the blocky fill animation on one line */
-  function fillLine(idx: number, done: () => void) {
-    const row = document.querySelector(`[data-line="${idx}"]`) as HTMLElement | null;
-    if (!row) { done(); return; }
-    const solid = row.querySelector(".solid") as HTMLElement;
-    const chunks = CHUNK_PATTERN[idx % CHUNK_PATTERN.length];
-    solid.style.setProperty("--chunks", String(chunks));
-    // start hidden, then reveal in blocks
-    solid.style.transition = "clip-path .32s steps(var(--chunks), end), transform .2s ease-out, filter .2s ease-out";
-    solid.style.clipPath = "inset(0 0% 0 0)";
-    row.style.transform = "translateY(0)";
-    row.style.filter = "none";
-    solid.addEventListener("transitionend", onEnd, { once: true });
-    function onEnd(e: TransitionEvent) { if (e.propertyName === "clip-path") done(); }
-  }
-  function unfillLine(idx: number, done: () => void) {
-    const row = document.querySelector(`[data-line="${idx}"]`) as HTMLElement | null;
-    if (!row) { done(); return; }
-    const solid = row.querySelector(".solid") as HTMLElement;
-    solid.style.transition = "clip-path .24s steps(var(--chunks), end)";
-    solid.style.clipPath = "inset(0 100% 0 0)";
-    row.style.transform = "translateY(2px)";
-    solid.addEventListener("transitionend", onEnd, { once: true });
-    function onEnd(e: TransitionEvent) { if (e.propertyName === "clip-path") done(); }
-  }
-
-  /** translate the stack by completed lines (smooth nudge up) */
+  /** Calculate vertical offset based on filled lines */
   const offset = useMemo(() => {
-    // count how many lines are filled to compute offset
-    const count = filled.reduce((acc, f, idx) => acc + (f ? 1 : 0), 0);
-    return `translateY(calc(${count * -1} * var(--lineH)))`;
-  }, [filled]);
+    return `translateY(calc(${filledLines.size * -1} * 3.2rem))`;
+  }, [filledLines]);
 
   return (
     <div className="relative">
@@ -152,40 +163,35 @@ const StoryStepper = () => {
       <div ref={viewportRef} className="max-h-[66vh] overflow-hidden pr-4">
         {/* stack of lines */}
         <div
-          className="transition-transform duration-300 ease-out will-change-transform"
-          style={{ transform: offset, ["--lineH" as any]: "3.2rem" }}  // line height unit for the nudge
+          className="transition-transform duration-500 ease-out will-change-transform"
+          style={{ transform: offset }}
         >
           {LINES.map((text, idx) => {
             const isBlank = text.trim() === "";
-            const isOn = filled[idx];
-            const chunks = CHUNK_PATTERN[idx % CHUNK_PATTERN.length];
-            // Only show lines that are filled or within 3 lines of current index
-            const isVisible = isOn || (idx >= i - 1 && idx <= i + 2);
+            const isFilled = filledLines.has(idx);
+            const isVisible = idx <= currentLine + 2;
 
             return (
               <div
                 key={idx}
                 data-line={idx}
-                className="relative h-[3.2rem] flex items-center"
+                className="relative h-[3.2rem] flex items-center transition-all duration-300"
                 style={{
-                  transform: isOn ? "translateY(0)" : "translateY(2px)",
-                  filter: isOn ? "none" : "blur(0.1px)",
                   opacity: isVisible ? 1 : 0,
-                  visibility: isVisible ? "visible" : "hidden",
+                  transform: isFilled ? "translateY(0)" : "translateY(2px)",
                 }}
               >
                 {/* ghost layer */}
-                <span className="ghost text-[clamp(20px,2.2vw,34px)] leading-none">
+                <span className="line-ghost text-[clamp(20px,2.2vw,34px)] leading-none">
                   {isBlank ? " " : text}
                 </span>
 
-                {/* solid layer (revealed in blocks) */}
+                {/* solid layer (revealed sequentially) */}
                 {!isBlank && (
                   <span
-                    className="solid absolute inset-0 text-[clamp(20px,2.2vw,34px)] leading-none"
+                    className="line-solid absolute inset-0 text-[clamp(20px,2.2vw,34px)] leading-none"
                     style={{
-                      clipPath: isOn ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
-                      ["--chunks" as any]: String(chunks),
+                      clipPath: isFilled ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
                     }}
                     aria-hidden="true"
                   >

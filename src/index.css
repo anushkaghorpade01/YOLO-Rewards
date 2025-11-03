@@ -148,8 +148,8 @@ All colors MUST be HSL.
     transition: opacity 0.8s ease-out;
   }
 
-  /* Story line layers - chunked block reveal with nudge */
-  .ghost {
+  /* Story line layers - smooth sequential reveal */
+  .line-ghost {
     color: rgba(10, 10, 10, 0.18);
     -webkit-text-stroke: 0.5px rgba(10, 10, 10, 0.25);
     text-stroke: 0.5px rgba(10, 10, 10, 0.25);
@@ -157,10 +157,9 @@ All colors MUST be HSL.
     text-rendering: optimizeLegibility;
   }
 
-  .solid {
+  .line-solid {
     color: #0A0A0A;
     clip-path: inset(0 100% 0 0);
-    transition: clip-path 0.32s steps(var(--chunks, 3), end);
     will-change: clip-path;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
