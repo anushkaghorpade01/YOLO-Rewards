@@ -12,23 +12,23 @@ const COPY_TEXT = `"Refer and earn up to this"
 You and I both know all the ifs and buts that come with 'up to' offers. And for some reason, you always sniff that there's something wrong.
 
 Same story when you move homes.
-
-There are none when you do it with Flent. Because experience has always been at the center of what Flent does, and I'm carrying that same energy into the world of our referral program.
-
-YOLO by Flent is that corner of the internet where referral rewards feel less transactional, more experiential (hint: rewards that don't fit in a cart)
+There are none when you do it with Flent. Because experience has always been at the center of what Flent does, and I'm carrying that same energy into the world of our referral program. 
+YOLO by Flent is that corner of the internet where referral rewards feel less transactional, more experiential (hint: rewards that don't fit in a cart) 
 
 If I design the way you should live with intention, so should the way I thank you for referring to it.
 
-- (not so genZ) marketer, Flent
+- (not so genZ) marketer, Flent 
+
 
 Also, yes, some slang dies and should stay dead – this one included. But I couldn't find a better word for that split-second energy of the "f-it, let's do it" moment – the one I want you to have too.`;
 
 const StoryStepper = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!textRef.current || !wrapperRef.current) return;
+    if (!textRef.current || !wrapperRef.current || !containerRef.current) return;
 
     // Split text into characters
     const splitText = new SplitType(textRef.current, { types: "chars" });
@@ -36,25 +36,49 @@ const StoryStepper = () => {
 
     if (!chars) return;
 
-    // Set initial state - all characters invisible
-    gsap.set(chars, { opacity: 0.15 });
+    const totalChars = chars.length;
+    const chunkSize = Math.ceil(totalChars * 0.3); // 30% per scroll
+
+    // Set initial state - only show first chunk as ghost, rest hidden
+    gsap.set(chars, { 
+      opacity: 0,
+      visibility: "hidden"
+    });
+    
+    // Show first chunk as ghost
+    gsap.set(chars.slice(0, chunkSize), {
+      opacity: 0.15,
+      visibility: "visible"
+    });
 
     // Create scroll-triggered animation
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: wrapperRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
-        pin: false,
+        trigger: containerRef.current,
+        start: "top center",
+        end: "+=3000", // Longer scroll distance for smoother control
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          const revealedCount = Math.floor(progress * totalChars);
+          const nextChunkEnd = Math.min(revealedCount + chunkSize, totalChars);
+          
+          // Show next chunk as ghost
+          chars.slice(0, nextChunkEnd).forEach(char => {
+            gsap.set(char, { visibility: "visible" });
+          });
+          
+          // Fill revealed characters
+          chars.slice(0, revealedCount).forEach(char => {
+            gsap.set(char, { opacity: 1 });
+          });
+          
+          // Ghost for upcoming characters
+          chars.slice(revealedCount, nextChunkEnd).forEach(char => {
+            gsap.set(char, { opacity: 0.15 });
+          });
+        }
       }
-    });
-
-    // Animate characters to full opacity as we scroll
-    tl.to(chars, {
-      opacity: 1,
-      stagger: 0.02,
-      ease: "none"
     });
 
     return () => {
@@ -64,23 +88,25 @@ const StoryStepper = () => {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="relative">
-      {/* top/bottom fades */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[18vh] bg-gradient-to-b from-light-bg to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[18vh] bg-gradient-to-t from-light-bg to-transparent z-10" />
+    <div ref={containerRef} className="relative min-h-[200vh]">
+      <div ref={wrapperRef} className="sticky top-1/4 relative">
+        {/* top/bottom fades */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[18vh] bg-gradient-to-b from-light-bg to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[18vh] bg-gradient-to-t from-light-bg to-transparent z-10" />
 
-      {/* viewport */}
-      <div className="max-h-[66vh] overflow-visible pr-4">
-        <p 
-          ref={textRef}
-          className="text-[clamp(20px,2.2vw,34px)] leading-relaxed whitespace-pre-wrap text-dark-text"
-          style={{ 
-            lineHeight: '1.6',
-            fontWeight: 400
-          }}
-        >
-          {COPY_TEXT}
-        </p>
+        {/* viewport */}
+        <div className="max-h-[66vh] overflow-visible pr-4">
+          <p 
+            ref={textRef}
+            className="text-[clamp(20px,2.2vw,34px)] leading-relaxed whitespace-pre-wrap text-dark-text"
+            style={{ 
+              lineHeight: '1.6',
+              fontWeight: 400
+            }}
+          >
+            {COPY_TEXT}
+          </p>
+        </div>
       </div>
     </div>
   );
