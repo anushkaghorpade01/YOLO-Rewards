@@ -146,7 +146,7 @@ export const Experience = () => {
             </div>
 
             {/* Slides */}
-            <div className="relative" style={{ height: "calc(100% - 128px)" }}>
+            <div className="relative" style={{ height: "calc(100% - 190px)" }}>
               {slides[currentSlide].content}
               
               {/* Slide indicators */}
@@ -185,7 +185,7 @@ export const Experience = () => {
             <motion.div
               data-depth="0.5"
               style={{ y: iconsY }}
-              className="flex items-center gap-4 p-4 border-t border-dark-text/10"
+              className="flex items-center gap-4 px-4 pt-3 pb-2"
             >
               <button onClick={handleLike} className="hover:scale-110 transition-transform">
                 <Heart className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-dark-text"}`} />
@@ -200,6 +200,17 @@ export const Experience = () => {
                 <Bookmark className="w-7 h-7 text-dark-text" />
               </button>
             </motion.div>
+
+            {/* Caption section */}
+            <div className="px-4 pb-3 space-y-1">
+              <p className="font-sans text-sm font-semibold text-dark-text">4,351 likes</p>
+              <p className="font-sans text-sm text-dark-text">
+                <span className="font-semibold">flent.in</span> YOLO Experience — refer and win the GOAT tour 🐐
+              </p>
+              <button className="font-sans text-sm text-dark-text/50 hover:text-dark-text/70 transition-colors">
+                view all 63 comments
+              </button>
+            </div>
           </div>
 
           {/* Comment quick-replies sheet */}
