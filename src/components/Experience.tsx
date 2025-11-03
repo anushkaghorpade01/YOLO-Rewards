@@ -130,17 +130,17 @@ export const Experience = () => {
           className="relative w-full px-6"
         >
           <div
-            className="mx-auto rounded-[24px] border border-light-text/10 bg-black"
+            className="mx-auto rounded-[24px] border border-dark-text/10 bg-white"
             style={{ width: "min(92vw, 420px)", aspectRatio: "4 / 5", overflow: "hidden" }}
           >
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-light-text/10">
+            <div className="flex items-center gap-3 p-4 border-b border-dark-text/10">
               <div className="w-10 h-10 rounded-full bg-coral flex items-center justify-center">
                 <span className="text-light-text font-bold text-sm">F</span>
               </div>
               <div>
-                <p className="font-sans font-semibold text-light-text text-sm">flent.homes</p>
-                <p className="font-sans text-light-text/60 text-xs">YOLO Experience</p>
+                <p className="font-sans font-semibold text-dark-text text-sm">flent.in</p>
+                <p className="font-sans text-dark-text/60 text-xs">YOLO Experience</p>
               </div>
             </div>
 
@@ -155,7 +155,7 @@ export const Experience = () => {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentSlide ? "bg-light-text w-6" : "bg-light-text/40"
+                      index === currentSlide ? "bg-dark-text w-6" : "bg-dark-text/40"
                     }`}
                   />
                 ))}
@@ -184,19 +184,19 @@ export const Experience = () => {
             <motion.div
               data-depth="0.5"
               style={{ y: iconsY }}
-              className="flex items-center gap-4 p-4 border-t border-light-text/10"
+              className="flex items-center gap-4 p-4 border-t border-dark-text/10"
             >
               <button onClick={handleLike} className="hover:scale-110 transition-transform">
-                <Heart className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-light-text"}`} />
+                <Heart className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-dark-text"}`} />
               </button>
               <button onClick={() => setShowComments(!showComments)} className="hover:scale-110 transition-transform">
-                <MessageCircle className="w-7 h-7 text-light-text" />
+                <MessageCircle className="w-7 h-7 text-dark-text" />
               </button>
               <button onClick={handleShare} className="hover:scale-110 transition-transform">
-                <Send className="w-7 h-7 text-light-text" />
+                <Send className="w-7 h-7 text-dark-text" />
               </button>
               <button onClick={() => setShowBookmark(true)} className="ml-auto hover:scale-110 transition-transform">
-                <Bookmark className="w-7 h-7 text-light-text" />
+                <Bookmark className="w-7 h-7 text-dark-text" />
               </button>
             </motion.div>
           </div>
