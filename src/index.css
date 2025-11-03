@@ -148,21 +148,25 @@ All colors MUST be HSL.
     transition: opacity 0.8s ease-out;
   }
 
-  /* Teleprompter line states */
-  [data-line] {
+  /* Teleprompter token states - discrete word reveal */
+  [data-token].token-off {
     color: rgba(10, 10, 10, 0.18);
-    transform: translateY(8px);
-    transition: color 0.22s ease-out, transform 0.18s ease-out;
-    text-shadow: 0 0 0.5px rgba(10, 10, 10, 0.3);
+    transition: color 0.22s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                transform 0.18s ease-out;
+    transform: translateY(2px);
   }
 
-  [data-line].line-semi {
-    color: rgba(10, 10, 10, 0.5);
-  }
-
-  [data-line].line-active {
+  [data-token].token-on {
     color: #0A0A0A;
     transform: translateY(0);
-    text-shadow: none;
+  }
+
+  /* Optional: coral accent rule for active paragraph */
+  .story-accent {
+    width: 28px;
+    height: 2px;
+    background: hsl(var(--coral));
+    opacity: 0.35;
+    transform: translateY(0.4em);
   }
 }
