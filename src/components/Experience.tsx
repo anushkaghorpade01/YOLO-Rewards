@@ -203,13 +203,16 @@ export const Experience = () => {
 
             {/* Caption section */}
             <div className="px-4 pb-3 space-y-1">
-              <p className="font-sans text-sm font-semibold text-dark-text">4,351 likes</p>
               <p className="font-sans text-sm text-dark-text">
                 <span className="font-semibold">flent.in</span> YOLO Experience — refer and win the GOAT tour 🐐
               </p>
-              <button className="font-sans text-sm text-dark-text/50 hover:text-dark-text/70 transition-colors">
-                view all 63 comments
-              </button>
+              {comments.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  {comments.map((c, i) => (
+                    <p key={i} className="font-sans text-sm text-dark-text">{c}</p>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -231,16 +234,6 @@ export const Experience = () => {
             </div>
           )}
 
-          {/* Comments list */}
-          {comments.length > 0 && (
-            <div className="mt-3 mx-auto" style={{ width: "min(92vw, 420px)" }}>
-              <ul className="space-y-1 text-sm text-light-text/90">
-                {comments.map((c, i) => (
-                  <li key={i} className="font-sans">{c}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </motion.div>
       </section>
 
