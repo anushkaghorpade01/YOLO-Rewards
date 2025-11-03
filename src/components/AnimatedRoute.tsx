@@ -84,7 +84,7 @@ export const AnimatedRoute = () => {
             fontFamily="Plus Jakarta Sans, sans-serif"
             className="select-none"
           >
-            They book with your <tspan fontWeight="700">name</tspan> and <tspan fontWeight="700">number</tspan>.
+            When they book, they'll include your <tspan fontWeight="700">name</tspan> and <tspan fontWeight="700">number</tspan> in the onboarding form.
           </text>
         </g>
 
