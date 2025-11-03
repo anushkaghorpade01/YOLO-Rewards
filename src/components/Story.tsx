@@ -7,6 +7,10 @@ import { PARAGRAPHS } from "@/data/storyCopy";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// LOCKED VALUES - DO NOT CHANGE
+const STORY_START_POSITION = 96; // Starting position percentage
+const STORY_MOVEMENT_RANGE = 220; // Total movement range percentage
+
 const StoryStepper = () => {
   const textRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -48,8 +52,8 @@ const StoryStepper = () => {
         const revealedCount = Math.floor(progress * totalWords);
         const nextChunkEnd = Math.min(revealedCount + chunkSize, totalWords);
         
-        // Move text up - start at 96%
-        const translateY = 96 - (progress * 220);
+        // Move text up - using locked positioning values
+        const translateY = STORY_START_POSITION - (progress * STORY_MOVEMENT_RANGE);
         gsap.set(wrapperRef.current, { y: `${translateY}%`, force3D: true });
         
         // Show next chunk as ghost
