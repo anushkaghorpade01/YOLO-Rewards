@@ -1,243 +1,455 @@
-import { useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { BookmarkModal } from "./BookmarkModal";
-import flentLogo from "@/assets/flent-logo.png";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+
+type ExperienceConfig = {
+  id: string;
+  expiresIn: number;
+  expiresAt?: string;
+  amount: string;
+  event: string;
+  minReferrals: number;
+  videoSrc: string;
+  detailsUrl: string;
+  placeholder?: boolean;
+};
+
+const experiences: ExperienceConfig[] = [
+  {
+    id: "exclusive-stay",
+    expiresIn: 18,
+    amount: "₹40,000",
+    event: "GOAT Tour India 2025",
+    minReferrals: 4,
+    videoSrc: "/Left%20carousel.png",
+    detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
+    placeholder: true,
+  },
+  {
+    id: "featured-experience",
+    expiresIn: 24,
+    expiresAt: "2025-12-05T18:29:00Z",
+    amount: "₹40,000",
+    event: "GOAT Tour India 2025",
+    minReferrals: 4,
+    videoSrc: "/fonts/Why%20is%20it%20taking%20so%20long.mp4",
+    detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
+  },
+  {
+    id: "city-pass",
+    expiresIn: 12,
+    amount: "₹40,000",
+    event: "GOAT Tour India 2025",
+    minReferrals: 4,
+    videoSrc: "/Right%20Carousel.png",
+    detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
+    placeholder: true,
+  },
+];
+
+type ExperienceTileProps = {
+  experience: ExperienceConfig;
+  onRedeem: () => void;
+  isLocked?: boolean;
+  onShowDetails?: () => void;
+};
+
+const ExperienceTile = ({ experience, onRedeem, onShowDetails, isLocked = false }: ExperienceTileProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [videoMuted, setVideoMuted] = useState(true);
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isLocked || !experience.expiresAt) {
+      return;
+    }
+
+    const updateCountdown = () => {
+      const target = new Date(experience.expiresAt).getTime();
+      if (Number.isNaN(target)) {
+        setDaysRemaining(null);
+        return;
+      }
+      const diff = target - Date.now();
+      const dayMs = 1000 * 60 * 60 * 24;
+      const days = Math.max(0, Math.floor(diff / dayMs));
+      setDaysRemaining(days);
+    };
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [experience.expiresAt, isLocked]);
+
+  const disableContent = isLocked || experience.placeholder;
+
+  return (
+    <div className="bg-light-bg text-dark-text rounded-[28px] border border-dark-text/10 shadow-2xl overflow-hidden flex flex-col w-[min(92vw,420px)]">
+      <div className="relative w-full aspect-video bg-dark-bg">
+        {!isLocked ? (
+          experience.placeholder ? (
+            <div className="absolute inset-0">
+              <div
+                className="absolute inset-0"
+            style={{
+                  backgroundImage: `url(${experience.videoSrc})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+                  filter: "blur(3.5px) saturate(1)",
+                }}
+              />
+              <div className="absolute inset-0 bg-dark-bg/55" />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <p className="text-light-text/90 text-base font-sans">Experience preview coming soon</p>
+      </div>
+    </div>
+          ) : !videoError ? (
+            <>
+              {!videoReady && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-light-text/80 text-sm">
+                  <span className="animate-pulse">Loading experience…</span>
+                </div>
+              )}
+              <video
+                ref={videoRef}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${videoReady ? "opacity-100" : "opacity-0"}`}
+                src={experience.videoSrc}
+                autoPlay
+                muted={videoMuted}
+                playsInline
+                loop
+                onCanPlay={() => setVideoReady(true)}
+                onError={() => {
+                  setVideoError(true);
+                  setVideoReady(false);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const nextMuted = !videoMuted;
+                  setVideoMuted(nextMuted);
+                  const videoElement = videoRef.current;
+                  if (videoElement) {
+                    videoElement.muted = nextMuted;
+                    if (!nextMuted) {
+                      void videoElement.play().catch(() => {
+                        setVideoMuted(true);
+                      });
+                    }
+                  }
+                }}
+                className="absolute bottom-3 right-3 z-20 px-3 py-1.5 bg-dark-bg/80 text-light-text text-xs font-sans rounded-full border border-light-text/30 backdrop-blur transition hover:bg-dark-bg/90 pointer-events-auto"
+              >
+                {videoMuted ? "Tap for sound" : "Sound on"}
+              </button>
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-dark-bg">
+              <p className="text-light-text text-base">Experience preview coming soon</p>
+            </div>
+          )
+        ) : (
+          <div className="absolute inset-0">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url(${experience.videoSrc})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "blur(3.5px) saturate(1)",
+            }} />
+            <div className="absolute inset-0 bg-dark-bg/55" />
+            <div className="relative z-10 h-full flex flex-col items-center justify-center gap-2 text-light-text">
+              <div className="w-14 h-14 rounded-full border border-light-text/30 bg-light-text/10 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  className="w-7 h-7 text-light-text"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75M6 10.5h12l1.5 10.5h-15L6 10.5z"
+                  />
+                </svg>
+        </div>
+              <span className="text-xs uppercase tracking-widest opacity-80">Unlocking soon</span>
+            </div>
+            </div>
+        )}
+
+        {!disableContent && (
+          <div className="absolute top-4 right-4 px-3 py-1 text-[11px] font-sans tracking-wide uppercase bg-white/80 text-dark-text rounded-full border border-white/40 backdrop-blur-sm shadow-sm">
+            Expires in {daysRemaining ?? experience.expiresIn} days
+            </div>
+        )}
+            </div>
+
+      <div className="flex flex-col gap-4 p-6 md:p-7 flex-1">
+        {!disableContent && (
+          <>
+            <h3 className="font-sans text-base md:text-lg leading-relaxed text-dark-text">
+              You get an all expense paid trip worth {""}
+              <span className="font-semibold text-dark-text">{experience.amount}</span>{" "}
+              including flights, stay, and tickets to the {""}
+              <span className="font-semibold text-dark-text">{experience.event}</span>.
+            </h3>
+            <p className="font-sans text-sm text-dark-text/70">
+              Minimum referrals required: {experience.minReferrals}
+            </p>
+          </>
+        )}
+
+        <div className="mt-auto flex flex-wrap gap-3 pt-2">
+          <a
+            href={disableContent ? "#" : experience.detailsUrl}
+            target={disableContent ? undefined : "_blank"}
+            rel={disableContent ? undefined : "noopener noreferrer"}
+            onClick={disableContent ? (event) => event.preventDefault() : (event) => {
+              event.preventDefault();
+              onShowDetails?.();
+            }}
+            className={`px-5 py-2.5 rounded-full border text-sm font-sans font-medium transition border-dark-text/20 text-dark-text hover:border-dark-text/40 hover:-translate-y-0.5 ${
+              disableContent ? "opacity-60" : ""
+            }`}
+          >
+            Details
+          </a>
+          <button
+            onClick={disableContent ? undefined : onRedeem}
+            className={`px-6 py-2.5 rounded-full text-sm font-sans font-semibold transition bg-dark-bg text-light-text hover:bg-dark-bg/90 hover:-translate-y-0.5 ${
+              disableContent ? "opacity-60" : ""
+            }`}
+          >
+            Refer Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const Experience = () => {
-  const [liked, setLiked] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [comments, setComments] = useState<string[]>([]);
-  const [showBookmark, setShowBookmark] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const { toast } = useToast();
   const experienceRef = useRef<HTMLDivElement>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(1);
 
   const { scrollYProgress } = useScroll({
     target: experienceRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
-  
-  // Enhanced parallax effects for Experience section
+
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 0.12, 0.12, 0]);
-  const frameY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [150, 0, 0, -100]);
-  const frameScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.85, 1, 1, 0.95]);
-  const frameOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.3]);
-  const iconsY = useTransform(scrollYProgress, [0.2, 0.5], [40, 0]);
+  const frameY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [150, 0, 0, -80]);
+  const frameScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.9, 1, 1, 0.95]);
+  const frameOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.4]);
 
-  const handleLike = async () => {
-    setLiked(!liked);
-    if (!liked) {
-      toast({ description: "Liked!" });
+  const scrollToFinal = () => {
+    const finalSection = document.getElementById("final");
+    finalSection?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const previous = () => {
+    setActiveIndex((prev) => (prev - 1 + experiences.length) % experiences.length);
+  };
+
+  const next = () => {
+    setActiveIndex((prev) => (prev + 1) % experiences.length);
+  };
+
+  useEffect(() => {
+    if (showDetails) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-  };
-
-  const handleShare = async () => {
-    const url = "https://www.flent.in/?utm_source=YOLO%20Site&utm_medium=website&utm_campaign=YOLO";
-    const text = "Check out Flent Homes — fully furnished ready-to-move homes.";
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "YOLO by Flent", text, url });
-        return;
-      } catch {}
-    }
-
-    // Fallback: open WhatsApp
-    const wa = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast({ description: "Link copied! Opening share options..." });
-    } catch {}
-    window.open(wa, "_blank");
-  };
-
-  const addComment = (text: string) => {
-    setComments((prev) => [...prev, text]);
-    setShowComments(false);
-  };
-
-  const slides = [
-    {
-      type: "video",
-      content: (
-        <div className="w-full h-full bg-dark-bg flex items-center justify-center">
-          <p className="text-light-text text-xl">📹 Reel placeholder</p>
-        </div>
-      ),
-    },
-    {
-      type: "card",
-      content: (
-        <div className="w-full h-full bg-light-bg p-8 flex flex-col items-center justify-center text-center">
-          <h3 className="text-3xl font-display text-dark-text mb-8">How to Refer</h3>
-          <div className="space-y-6 text-left max-w-md">
-            <p className="text-lg font-sans text-dark-text">
-              <span className="font-bold">1️⃣</span> Share Flent Homes with your friends.
-            </p>
-            <p className="text-lg font-sans text-dark-text">
-              <span className="font-bold">2️⃣</span> They book with your name + number.
-            </p>
-            <p className="text-lg font-sans text-dark-text">
-              <span className="font-bold">3️⃣</span> You win the GOAT Tour India trip.
-            </p>
-          </div>
-          <a
-            href="https://flent.notion.site/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-8 text-sm text-coral hover:text-coral-hover underline transition-colors"
-          >
-            View Terms & Conditions
-          </a>
-        </div>
-      ),
-    },
-    {
-      type: "cta",
-      content: (
-        <div className="w-full h-full bg-coral flex flex-col items-center justify-center text-center p-8">
-          <h3 className="text-4xl font-display text-light-text mb-4">Ready to win?</h3>
-          <p className="text-xl font-sans text-light-text/90 mb-8">Start referring now</p>
-          <button
-            onClick={() => {
-              const finalSection = document.getElementById("final");
-              finalSection?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="px-8 py-4 bg-dark-bg text-light-text rounded-lg font-sans font-semibold hover:scale-105 transition-transform"
-          >
-            Get Started
-          </button>
-        </div>
-      ),
-    },
-  ];
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showDetails]);
 
   return (
-    <>
-      <section ref={experienceRef} id="experience" className="relative min-h-screen bg-dark-bg flex items-center justify-center py-20">
-        {/* L1: Overlay */}
+    <section
+      ref={experienceRef}
+      id="experience"
+      className="relative min-h-[75vh] bg-dark-bg flex items-start justify-center py-10 md:py-14"
+    >
         <motion.div
           data-depth="0.15"
           style={{ opacity: overlayOpacity }}
           className="absolute inset-0 bg-dark-bg pointer-events-none"
         />
 
-        {/* L2: IG Frame */}
         <motion.div
           data-depth="0.3"
           style={{ y: frameY, scale: frameScale, opacity: frameOpacity }}
           className="relative w-full px-6"
         >
-          <div
-            className="mx-auto rounded-[24px] border border-dark-text/10 bg-white"
-            style={{ width: "min(92vw, 420px)", aspectRatio: "4 / 5", overflow: "hidden" }}
-          >
-            {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-dark-text/10">
-              <div className="w-10 h-10 rounded-full bg-white border border-dark-text/10 flex items-center justify-center overflow-hidden">
-                <img src={flentLogo} alt="Flent" className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <p className="font-sans font-semibold text-dark-text text-sm">flent.in</p>
-                <p className="font-sans text-dark-text/60 text-xs">YOLO Experience</p>
-              </div>
-            </div>
-
-            {/* Slides */}
-            <div className="relative" style={{ height: "calc(100% - 190px)" }}>
-              {slides[currentSlide].content}
-              
-              {/* Slide indicators */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentSlide ? "bg-dark-text w-6" : "bg-dark-text/40"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Navigation arrows */}
-              {currentSlide > 0 && (
-                <button
-                  onClick={() => setCurrentSlide(currentSlide - 1)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform z-10"
-                >
-                  ‹
-                </button>
-              )}
-              {currentSlide < slides.length - 1 && (
-                <button
-                  onClick={() => setCurrentSlide(currentSlide + 1)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-bg/80 text-light-text flex items-center justify-center hover:scale-110 transition-transform z-10"
-                >
-                  ›
-                </button>
-              )}
-            </div>
-
-            {/* L3: Icons row */}
-            <motion.div
-              data-depth="0.5"
-              style={{ y: iconsY }}
-              className="flex items-center gap-4 px-4 pt-3 pb-2"
-            >
-              <button onClick={handleLike} className="hover:scale-110 transition-transform">
-                <Heart className={`w-7 h-7 ${liked ? "fill-coral text-coral" : "text-dark-text"}`} />
-              </button>
-              <button onClick={() => setShowComments(!showComments)} className="hover:scale-110 transition-transform">
-                <MessageCircle className="w-7 h-7 text-dark-text" />
-              </button>
-              <button onClick={handleShare} className="hover:scale-110 transition-transform">
-                <Send className="w-7 h-7 text-dark-text" />
-              </button>
-              <button onClick={() => setShowBookmark(true)} className="ml-auto hover:scale-110 transition-transform">
-                <Bookmark className="w-7 h-7 text-dark-text" />
-              </button>
-            </motion.div>
-
-            {/* Caption section */}
-            <div className="px-4 pb-3 space-y-1">
-              <p className="font-sans text-sm text-dark-text">
-                <span className="font-semibold">flent.in</span> YOLO Experience — refer and win the GOAT tour 🐐
-              </p>
-              {comments.length > 0 && (
-                <div className="space-y-1 pt-1">
-                  {comments.map((c, i) => (
-                    <p key={i} className="font-sans text-sm text-dark-text">{c}</p>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="text-center mb-10 md:mb-12">
+          <h2 className="heading-display text-6xl md:text-7xl lg:text-8xl text-light-text">Featured Experience</h2>
+          <p className="font-sans italic text-light-text/90 mt-4 text-lg md:text-xl">
+            The experience everyone's after
+          </p>
           </div>
 
-          {/* Comment quick-replies sheet */}
-          {showComments && (
-            <div className="mt-4 bg-light-bg text-dark-text rounded-xl shadow-lg p-3 flex gap-2 z-20 mx-auto" style={{ width: "min(92vw, 420px)" }}>
+          <div className="relative w-full flex items-center justify-center" style={{ perspective: 1000 }}>
+          {experiences.map((experience, index) => {
+            const position = (index - activeIndex + experiences.length) % experiences.length;
+            const isCenter = position === 0;
+            const isLeft = position === experiences.length - 1;
+            const isRight = position === 1;
+
+            let x = 0;
+            let scale = 1;
+            let opacity = 1;
+            let zIndex = isCenter ? 30 : 10;
+            let isLocked = !isCenter;
+
+            if (isLeft) {
+              x = -220;
+              scale = 0.92;
+              opacity = 0.55;
+            } else if (isRight) {
+              x = 220;
+              scale = 0.92;
+              opacity = 0.55;
+            } else if (!isCenter) {
+              opacity = 0;
+            }
+
+            return (
+            <motion.div
+                key={experience.id}
+                className={isCenter ? "relative" : "absolute"}
+                initial={{ x, scale, opacity }}
+                animate={{ x, scale, opacity, zIndex }}
+              transition={{ type: "spring", stiffness: 160, damping: 18 }}
+            >
+                <ExperienceTile
+                  experience={experience}
+                  onRedeem={scrollToFinal}
+                  onShowDetails={isCenter ? () => setShowDetails(true) : undefined}
+                  isLocked={isLocked}
+                />
+              </motion.div>
+            );
+          })}
+          </div>
+
+          <div className="mt-10 flex justify-center gap-4">
+            <button
+              onClick={previous}
+              className="w-11 h-11 rounded-full border border-light-text/50 text-light-text hover:border-light-text transition"
+              aria-label="Previous experience"
+            >
+              ‹
+            </button>
+            <button
+              onClick={next}
+              className="w-11 h-11 rounded-full border border-light-text/50 text-light-text hover:border-light-text transition"
+              aria-label="Next experience"
+            >
+              ›
+            </button>
+          </div>
+            </motion.div>
+
+      <AnimatePresence>
+        {showDetails && (
+            <motion.div
+            className="fixed inset-0 z-[100] flex items-center md:items-end justify-start md:justify-center pl-0 pr-28 sm:px-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setShowDetails(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 30 }}
+              className="experience-modal-panel relative z-[110] bg-light-bg shadow-2xl"
+              style={
+                {
+                  "--experience-modal-shift": "calc(-8rem - 320px)",
+                } as CSSProperties
+              }
+            >
+              <div className="flex justify-center pb-3">
+                <span className="h-1.5 w-12 rounded-full bg-dark-text/15" />
+          </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="font-display text-2xl text-dark-text">How it works</h3>
               <button
-                onClick={() => addComment("Here to win 🏆")}
-                className="px-4 py-2 bg-dark-text/5 hover:bg-dark-text/10 rounded-lg font-sans text-sm transition-colors"
-              >
-                Here to win 🏆
-              </button>
-              <button
-                onClick={() => addComment("🐐")}
-                className="px-4 py-2 bg-dark-text/5 hover:bg-dark-text/10 rounded-lg font-sans text-sm transition-colors"
-              >
-                🐐
+                    onClick={() => setShowDetails(false)}
+                    className="text-dark-text/50 hover:text-dark-text"
+                    aria-label="Close"
+                  >
+                    ×
               </button>
             </div>
-          )}
 
+                <div className="space-y-4">
+                  {[
+                    {
+                      title: "Step 1 · Get Started",
+                      description: "Tap Redeem now. You’ll land on the Start Referring page.",
+                    },
+                    {
+                      title: "Step 2 · Add Your Details",
+                      description: "Enter your full name and phone number, then hit Refer Now.",
+                    },
+                    {
+                      title: "Step 3 · Share the Word",
+                      description:
+                        "Choose how you want to spread the word — WhatsApp, Instagram or LinkedIn. We’ll load a pre-written message; all you have to do is hit Send.",
+                    },
+                    {
+                      title: "Step 4 · When They Book",
+                      description:
+                        "When your friends book a Flent Home, they’ll be asked who referred them. They just need to add your name and number in their onboarding form.",
+                    },
+                    {
+                      title: "Step 5 · Win Big",
+                      description:
+                        "Every successful referral counts. Earn 4 confirmed bookings and you’ll win an all-expenses-paid trip to the GOAT Tour India, Mumbai on 15th Dec 2025.",
+                    },
+                  ].map((step, index) => (
+                    <div
+                      key={step.title}
+                      className="rounded-2xl border border-dark-text/10 bg-white/60 px-5 py-4 shadow-sm break-words"
+                    >
+                      <p className="font-sans font-semibold text-dark-text mb-2">
+                        {step.title}
+                      </p>
+                      <p className="font-sans text-sm leading-relaxed text-dark-text/80">
+                        {step.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <a
+                  href="https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-dark-text/20 px-5 py-3 font-sans text-xs md:text-sm font-medium text-dark-text hover:border-dark-text/40 whitespace-nowrap"
+                >
+                  View Terms & Conditions
+                </a>
+              </div>
+            </motion.div>
         </motion.div>
+        )}
+      </AnimatePresence>
       </section>
-
-      <BookmarkModal isOpen={showBookmark} onClose={() => setShowBookmark(false)} />
-    </>
   );
 };

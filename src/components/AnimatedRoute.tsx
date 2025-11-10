@@ -1,167 +1,174 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+
+type StepConfig = {
+  id: number;
+  copy: JSX.Element;
+  desktopPosition: { left: string; top: string };
+  mobilePosition: { left: string; top: string };
+  desktopTextOffset: number;
+  mobileTextOffset: number;
+  mobileMaxWidth?: string;
+  align?: "left" | "center" | "right";
+};
+
+const STEPS: StepConfig[] = [
+  {
+    id: 1,
+    copy: (
+      <>
+        Fill in your details and share with <span className="font-semibold">4 friends</span>.
+      </>
+    ),
+    desktopPosition: { left: "16%", top: "66px" },
+    mobilePosition: { left: "16%", top: "64px" },
+    desktopTextOffset: 12,
+    mobileTextOffset: 20,
+    mobileMaxWidth: "110px",
+    align: "center",
+  },
+  {
+    id: 2,
+    copy: (
+      <>
+        When they book, they&apos;ll include your <span className="font-semibold">name</span> and{" "}
+        <span className="font-semibold">number</span> in the onboarding form.
+      </>
+    ),
+    desktopPosition: { left: "52%", top: "50px" },
+    mobilePosition: { left: "52%", top: "48px" },
+    desktopTextOffset: 32,
+    mobileTextOffset: 20,
+    mobileMaxWidth: "150px",
+    align: "center",
+  },
+  {
+    id: 3,
+    copy: (
+      <>
+        You win an all-expenses-paid trip to the <span className="font-semibold">GOAT Tour India, Mumbai.</span>
+      </>
+    ),
+    desktopPosition: { left: "94%", top: "66px" },
+    mobilePosition: { left: "86%", top: "64px" },
+    desktopTextOffset: 12,
+    mobileTextOffset: 20,
+    mobileMaxWidth: "130px",
+    align: "center",
+  },
+];
+
+const circleBaseClasses =
+  "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border-2 font-semibold text-sm sm:text-lg will-change-transform";
+
+const STEP_SEQUENCE = [1, 2, 3];
 
 export const AnimatedRoute = () => {
-  const [isAnimating, setIsAnimating] = useState(true);
-  const [showReplay, setShowReplay] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-      setShowReplay(true);
-    }, 4000);
+    let index = 0;
+    const interval = window.setInterval(() => {
+      index = (index + 1) % STEP_SEQUENCE.length;
+      setActiveStep(STEP_SEQUENCE[index]);
+    }, 2400);
 
-    return () => clearTimeout(timer);
-  }, [isAnimating]);
+    return () => window.clearInterval(interval);
+  }, []);
 
-  const replay = () => {
-    setShowReplay(false);
-    setIsAnimating(true);
-  };
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = (event: MediaQueryList | MediaQueryListEvent) => {
+      const matches = "matches" in event ? event.matches : event.currentTarget?.matches;
+      if (typeof matches === "boolean") {
+        setIsMobile(matches);
+      }
+    };
+
+    update(mq);
+    if (mq.addEventListener) {
+      mq.addEventListener("change", update);
+    } else {
+      mq.addListener(update);
+    }
+
+    return () => {
+      if (mq.removeEventListener) {
+        mq.removeEventListener("change", update);
+      } else {
+        mq.removeListener(update);
+      }
+    };
+  }, []);
+
+  const pathDefinition = isMobile
+    ? "M60 68 C124 44 188 44 236 58 C282 72 332 74 360 66"
+    : "M102 72 C220 28 280 28 332 60 C384 92 500 92 602 72";
+
+  const containerWidthClass = isMobile ? "max-w-[360px]" : "max-w-4xl";
 
   return (
-    <div className="relative w-full max-w-sm mx-auto">
-      <svg
-        width="100%"
-        height="500"
-        viewBox="0 0 300 500"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-full"
-      >
-        {/* Dotted S-curve path */}
-        <path
-          d="M 50 50 Q 100 150, 150 200 Q 200 250, 150 350 Q 100 400, 50 450"
-          stroke="#0A0A0A"
-          strokeWidth="2"
-          strokeDasharray="8,8"
+    <div className={`relative mx-auto w-full ${containerWidthClass}`}>
+      <div className="relative h-[240px]">
+        <svg
+          className="absolute inset-0 h-full w-full pointer-events-none"
+          viewBox={isMobile ? "0 0 400 200" : "0 0 640 240"}
           fill="none"
-        />
-
-        {/* Solid segment for takeoff */}
-        {isAnimating && (
-          <motion.path
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.4, delay: 3.3 }}
-            d="M 50 450 Q 120 440, 200 420"
-            stroke="#0A0A0A"
-            strokeWidth="3"
-            fill="none"
-          />
-        )}
-
-        {/* Waypoint 1 */}
-        <g>
-          <circle cx="50" cy="50" r="12" fill="#FFFFFF" stroke="#0A0A0A" strokeWidth="2" />
-          <text x="50" y="55" textAnchor="middle" fill="#0A0A0A" fontSize="16" fontWeight="700">
-            1
-          </text>
-          <text
-            x="80"
-            y="55"
-            fill="#0A0A0A"
-            fontSize="14"
-            fontFamily="Plus Jakarta Sans, sans-serif"
-            className="select-none"
-          >
-            Share Flent Homes with <tspan fontWeight="700">5 friends</tspan>.
-          </text>
-        </g>
-
-        {/* Waypoint 2 */}
-        <g>
-          <circle cx="150" cy="200" r="12" fill="#FFFFFF" stroke="#0A0A0A" strokeWidth="2" />
-          <text x="150" y="205" textAnchor="middle" fill="#0A0A0A" fontSize="16" fontWeight="700">
-            2
-          </text>
-          <text
-            x="180"
-            y="195"
-            fill="#0A0A0A"
-            fontSize="13"
-            fontFamily="Plus Jakarta Sans, sans-serif"
-            className="select-none"
-          >
-            <tspan x="180" dy="0">When they book,</tspan>
-            <tspan x="180" dy="16">they'll include your</tspan>
-            <tspan x="180" dy="16"><tspan fontWeight="700">name</tspan> and <tspan fontWeight="700">number</tspan></tspan>
-            <tspan x="180" dy="16">in the onboarding form.</tspan>
-          </text>
-        </g>
-
-        {/* Waypoint 3 */}
-        <g>
-          <circle cx="50" cy="450" r="12" fill="#FF6A3D" stroke="#0A0A0A" strokeWidth="2" />
-          <text x="50" y="455" textAnchor="middle" fill="#FFFFFF" fontSize="16" fontWeight="700">
-            3
-          </text>
-          <text
-            x="80"
-            y="455"
-            fill="#0A0A0A"
-            fontSize="14"
-            fontFamily="Plus Jakarta Sans, sans-serif"
-            className="select-none"
-          >
-            You win the <tspan fontWeight="700">GOAT Tour</tspan> India trip.
-          </text>
-        </g>
-
-        {/* Animated plane */}
-        {isAnimating && (
-          <motion.g
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 1, 1, 1, 1, 0],
-              rotate: [0, 0, 0, 0, 0, -20],
-              y: [0, 0, 0, 0, 0, -8],
-              scale: [1, 1, 1, 1, 1, 0.96],
-            }}
-            transition={{
-              duration: 3.8,
-              times: [0, 0.25, 0.35, 0.6, 0.7, 1],
-              ease: "easeInOut",
-            }}
-            style={{ 
-              offsetPath: "path('M 50 50 Q 100 150, 150 200 Q 200 250, 150 350 Q 100 400, 50 450 Q 120 440, 200 420')",
-              offsetDistance: "0%"
-            }}
-          >
-            <path
-              d="M -10 0 L 10 0 L 12 -8 L -12 -8 Z M 0 -3 L -8 2 M 0 -3 L 8 2"
-              fill="#0A0A0A"
-              stroke="#0A0A0A"
-              strokeWidth="1.5"
-            />
-          </motion.g>
-        )}
-
-        {/* CTA pulse at end */}
-        {isAnimating && (
-          <motion.circle
-            initial={{ r: 0, opacity: 0 }}
-            animate={{ r: 20, opacity: [0, 0.3, 0] }}
-            transition={{ duration: 0.3, delay: 3.7 }}
-            cx="200"
-            cy="420"
-            fill="#FF6A3D"
-          />
-        )}
-      </svg>
-
-      {/* Replay button */}
-      {showReplay && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          onClick={replay}
-          className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-dark-text/80 hover:bg-dark-text flex items-center justify-center transition-all hover:scale-110"
+          preserveAspectRatio="xMidYMid meet"
         >
-          <Play className="w-5 h-5 text-light-text ml-0.5" fill="currentColor" />
-        </motion.button>
-      )}
+          <path
+            d={pathDefinition}
+            stroke="currentColor"
+            strokeWidth="4"
+            strokeDasharray="12 12"
+            className="text-dark-text/70"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+
+        {STEPS.map((step) => {
+          const isActive = activeStep === step.id;
+          const inactiveColor = "hsl(var(--dark-text))";
+          const position = isMobile ? step.mobilePosition : step.desktopPosition;
+          const textOffset = (isMobile ? step.mobileTextOffset : step.desktopTextOffset) ?? 12;
+          const mobileWidthClass = isMobile && step.mobileMaxWidth ? step.mobileMaxWidth : undefined;
+
+          return (
+            <div
+              key={step.id}
+                className="absolute flex -translate-x-1/2 flex-col items-center text-center"
+              style={position}
+            >
+              <motion.div
+                className={circleBaseClasses}
+                animate={{
+                  backgroundColor: isActive ? "hsl(var(--coral))" : "hsl(var(--light-bg))",
+                  borderColor: isActive ? "hsl(var(--coral))" : inactiveColor,
+                  color: isActive ? "hsl(var(--light-text))" : inactiveColor,
+                  scale: isActive ? 1.08 : 1,
+                }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                {step.id}
+              </motion.div>
+
+              <motion.p
+                className="max-w-[120px] sm:max-w-[200px] text-[9px] leading-[1.25] text-dark-text/90 sm:text-sm"
+                animate={{
+                  scale: isActive ? 1.05 : 1,
+                  opacity: isActive ? 1 : 0.78,
+                }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                style={{ marginTop: textOffset, maxWidth: mobileWidthClass }}
+              >
+                {step.copy}
+              </motion.p>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

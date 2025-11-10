@@ -11,23 +11,53 @@ interface ShareModalProps {
 
 export const ShareModal = ({ isOpen, onClose, fullName, phone }: ShareModalProps) => {
   const { toast } = useToast();
-  const url = "https://www.flent.in/?utm_source=YOLO%20Site&utm_medium=website&utm_campaign=YOLO";
+  const url = "https://shorturl.at/Z4XA7";
   
+  const copyToClipboard = async (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (error) {
+        console.error("navigator.clipboard.writeText failed", error);
+      }
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "absolute";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch (error) {
+      console.error("document.execCommand('copy') failed", error);
+      copied = false;
+    }
+
+    document.body.removeChild(textarea);
+    return copied;
+  };
+
   const messages = {
-    whatsapp: `Hey, saw this rental housing platform called Flent that offers fully furnished ready-to-move homes. If you're looking to move, check out their website: ${url}\nAlso, if you end up booking, add my name (${fullName}) and number (${phone}) in their onboarding form!`,
+    whatsapp: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
     
-    instagram: `Check out this rental housing platform for fully furnished homes in Bangalore, Flent Homes — looks good if you're planning to move soon.\n${url}\nAlso, if you end up booking, add my name (${fullName}) and number (${phone}) in their onboarding form!`,
+    instagram: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
     
-    generic: `Check out Flent Homes, it's a rental housing platform that offers fully furnished ready-to-move-in homes in Bangalore:\n${url}\nAlso, if you end up booking, just write my name (${fullName}) and number (${phone}) in their onboarding form.`,
+    generic: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
   };
 
   const copyGenericLink = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
+    const copied = await copyToClipboard(url);
+    if (copied) {
       toast({
         description: "Link copied to clipboard!",
       });
-    } catch {
+    } else {
       toast({
         description: "Could not copy. Please copy manually.",
         variant: "destructive",
@@ -36,17 +66,23 @@ export const ShareModal = ({ isOpen, onClose, fullName, phone }: ShareModalProps
   };
 
   const copyInstagramMessage = async () => {
-    try {
-      await navigator.clipboard.writeText(messages.instagram);
+    const instagramUrl = `https://www.instagram.com/direct/new/?text=${encodeURIComponent(
+      messages.instagram
+    )}`;
+
+    const copied = await copyToClipboard(messages.instagram);
+
+    if (!copied) {
       toast({
-        description: "Message copied! You can paste it in Instagram DM.",
+        description: "Could not copy automatically — the message will be pasted in a new window.",
       });
-    } catch {
+    } else {
       toast({
-        description: "Could not copy. Please copy manually.",
-        variant: "destructive",
+        description: "Message copied! Opening Instagram…",
       });
     }
+
+    window.open(instagramUrl, "_blank");
   };
 
   const shareToWhatsApp = () => {
@@ -86,28 +122,28 @@ export const ShareModal = ({ isOpen, onClose, fullName, phone }: ShareModalProps
             onClick={shareToWhatsApp}
             className="w-full px-6 py-3 bg-[#25D366] text-white rounded-lg font-sans font-semibold hover:opacity-90 transition-opacity"
           >
-            Share on WhatsApp
+            WhatsApp
           </button>
           
           <button
             onClick={copyInstagramMessage}
             className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-sans font-semibold hover:opacity-90 transition-opacity"
           >
-            Copy for Instagram DM
+            Instagram
           </button>
           
           <button
             onClick={shareToLinkedIn}
             className="w-full px-6 py-3 bg-[#0077B5] text-white rounded-lg font-sans font-semibold hover:opacity-90 transition-opacity"
           >
-            Share on LinkedIn
+            LinkedIn
           </button>
           
           <button
             onClick={shareToMessenger}
             className="w-full px-6 py-3 bg-[#0084FF] text-white rounded-lg font-sans font-semibold hover:opacity-90 transition-opacity"
           >
-            Share on Messenger
+            Messenger
           </button>
           
           <button
@@ -117,13 +153,6 @@ export const ShareModal = ({ isOpen, onClose, fullName, phone }: ShareModalProps
             Copy Link
           </button>
         </div>
-        
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-dark-text/60 hover:text-dark-text transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
       </DialogContent>
     </Dialog>
   );
