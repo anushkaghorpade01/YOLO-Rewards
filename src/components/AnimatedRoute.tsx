@@ -20,12 +20,12 @@ const STEPS: StepConfig[] = [
         Fill in your details and share with <span className="font-semibold">4 friends</span>.
       </>
     ),
-    desktopPosition: { left: "16%", top: "66px" },
-    mobilePosition: { left: "16%", top: "64px" },
+    desktopPosition: { left: "14%", top: "66px" },
+    mobilePosition: { left: "22%", top: "60px" },
     desktopTextOffset: 12,
-    mobileTextOffset: 20,
-    mobileMaxWidth: "110px",
-    align: "center",
+    mobileTextOffset: 30,
+    mobileMaxWidth: "112px",
+    align: "left",
   },
   {
     id: 2,
@@ -35,31 +35,32 @@ const STEPS: StepConfig[] = [
         <span className="font-semibold">number</span> in the onboarding form.
       </>
     ),
-    desktopPosition: { left: "52%", top: "50px" },
-    mobilePosition: { left: "52%", top: "48px" },
+    desktopPosition: { left: "48%", top: "50px" },
+    mobilePosition: { left: "50%", top: "42px" },
     desktopTextOffset: 32,
-    mobileTextOffset: 20,
-    mobileMaxWidth: "150px",
+    mobileTextOffset: 28,
+    mobileMaxWidth: "148px",
     align: "center",
   },
   {
     id: 3,
     copy: (
       <>
-        You win an all-expenses-paid trip to the <span className="font-semibold">GOAT Tour India, Mumbai.</span>
+        You win an all-expenses-paid trip to the{" "}
+        <span className="font-semibold whitespace-nowrap">G.O.A.T India Tour 2025</span> in Mumbai.
       </>
     ),
-    desktopPosition: { left: "94%", top: "66px" },
-    mobilePosition: { left: "86%", top: "64px" },
+    desktopPosition: { left: "88%", top: "66px" },
+    mobilePosition: { left: "78%", top: "58px" },
     desktopTextOffset: 12,
-    mobileTextOffset: 20,
-    mobileMaxWidth: "130px",
-    align: "center",
+    mobileTextOffset: 30,
+    mobileMaxWidth: "140px",
+    align: "right",
   },
 ];
 
 const circleBaseClasses =
-  "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border-2 font-semibold text-sm sm:text-lg will-change-transform";
+  "flex h-9 w-9 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-full border-2 font-semibold text-[13px] lg:text-lg will-change-transform";
 
 const STEP_SEQUENCE = [1, 2, 3];
 
@@ -80,7 +81,7 @@ export const AnimatedRoute = () => {
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     const update = (event: MediaQueryList | MediaQueryListEvent) => {
-      const matches = "matches" in event ? event.matches : event.currentTarget?.matches;
+      const matches = "matches" in event ? event.matches : mq.matches;
       if (typeof matches === "boolean") {
         setIsMobile(matches);
       }
@@ -103,8 +104,8 @@ export const AnimatedRoute = () => {
   }, []);
 
   const pathDefinition = isMobile
-    ? "M60 68 C124 44 188 44 236 58 C282 72 332 74 360 66"
-    : "M102 72 C220 28 280 28 332 60 C384 92 500 92 602 72";
+    ? "M36 70 C120 40 200 40 260 54 C320 68 340 72 362 66"
+    : "M60 72 C190 24 270 26 330 56 C390 86 510 88 602 72";
 
   const containerWidthClass = isMobile ? "max-w-[360px]" : "max-w-4xl";
 
@@ -133,7 +134,7 @@ export const AnimatedRoute = () => {
           const inactiveColor = "hsl(var(--dark-text))";
           const position = isMobile ? step.mobilePosition : step.desktopPosition;
           const textOffset = (isMobile ? step.mobileTextOffset : step.desktopTextOffset) ?? 12;
-          const mobileWidthClass = isMobile && step.mobileMaxWidth ? step.mobileMaxWidth : undefined;
+          const textMaxWidth = isMobile ? step.mobileMaxWidth ?? "160px" : "200px";
 
           return (
             <div
@@ -155,13 +156,19 @@ export const AnimatedRoute = () => {
               </motion.div>
 
               <motion.p
-                className="max-w-[120px] sm:max-w-[200px] text-[9px] leading-[1.25] text-dark-text/90 sm:text-sm"
+                className={`${
+                  isMobile ? "text-[6.8px]" : "text-sm"
+                } leading-[1.36] text-dark-text/90`}
                 animate={{
                   scale: isActive ? 1.05 : 1,
                   opacity: isActive ? 1 : 0.78,
                 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                style={{ marginTop: textOffset, maxWidth: mobileWidthClass }}
+                style={{
+                  marginTop: textOffset,
+                  maxWidth: textMaxWidth,
+                  textAlign: "center",
+                }}
               >
                 {step.copy}
               </motion.p>

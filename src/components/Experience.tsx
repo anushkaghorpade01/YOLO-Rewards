@@ -18,7 +18,7 @@ const experiences: ExperienceConfig[] = [
     id: "exclusive-stay",
     expiresIn: 18,
     amount: "₹40,000",
-    event: "GOAT Tour India 2025",
+    event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
     videoSrc: "/Left%20carousel.png",
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
@@ -29,16 +29,16 @@ const experiences: ExperienceConfig[] = [
     expiresIn: 24,
     expiresAt: "2025-12-05T18:29:00Z",
     amount: "₹40,000",
-    event: "GOAT Tour India 2025",
+    event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
-    videoSrc: "/fonts/Why%20is%20it%20taking%20so%20long.mp4",
+    videoSrc: "/fonts/messi%20final.mp4",
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
   },
   {
     id: "city-pass",
     expiresIn: 12,
     amount: "₹40,000",
-    event: "GOAT Tour India 2025",
+    event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
     videoSrc: "/Right%20Carousel.png",
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
@@ -86,19 +86,19 @@ const ExperienceTile = ({ experience, onRedeem, onShowDetails, isLocked = false 
 
   return (
     <div className="bg-light-bg text-dark-text rounded-[28px] border border-dark-text/10 shadow-2xl overflow-hidden flex flex-col w-[min(92vw,420px)]">
-      <div className="relative w-full aspect-video bg-dark-bg">
+      <div className="relative w-full bg-dark-bg" style={{ paddingBottom: "58%" }}>
         {!isLocked ? (
           experience.placeholder ? (
             <div className="absolute inset-0">
-              <div
+          <div
                 className="absolute inset-0"
             style={{
                   backgroundImage: `url(${experience.videoSrc})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
                   filter: "blur(3.5px) saturate(1)",
-                }}
-              />
+            }}
+          />
               <div className="absolute inset-0 bg-dark-bg/55" />
               <div className="relative z-10 flex items-center justify-center h-full">
                 <p className="text-light-text/90 text-base font-sans">Experience preview coming soon</p>
@@ -192,9 +192,8 @@ const ExperienceTile = ({ experience, onRedeem, onShowDetails, isLocked = false 
         {!disableContent && (
           <>
             <h3 className="font-sans text-base md:text-lg leading-relaxed text-dark-text">
-              You get an all expense paid trip worth {""}
-              <span className="font-semibold text-dark-text">{experience.amount}</span>{" "}
-              including flights, stay, and tickets to the {""}
+              Bring in four confirmed move ins by <span className="font-semibold text-dark-text">5th December</span> and you get an all expenses paid trip worth{" "}
+              <span className="font-semibold text-dark-text">{experience.amount}</span>, including flights, stay and tickets to the{" "}
               <span className="font-semibold text-dark-text">{experience.event}</span>.
             </h3>
             <p className="font-sans text-sm text-dark-text/70">
@@ -289,10 +288,13 @@ export const Experience = () => {
           className="relative w-full px-6"
         >
         <div className="text-center mb-10 md:mb-12">
-          <h2 className="heading-display text-6xl md:text-7xl lg:text-8xl text-light-text">Featured Experience</h2>
-          <p className="font-sans italic text-light-text/90 mt-4 text-lg md:text-xl">
-            The experience everyone's after
-          </p>
+          <span
+            className="block text-2xl sm:text-3xl md:text-4xl font-sans font-medium uppercase tracking-[0.16em] text-light-text whitespace-nowrap"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            REFER AND LIVE THE
+          </span>
+          <h2 className="mt-3 heading-display text-6xl md:text-7xl lg:text-8xl text-light-text tracking-[-0.02em]">Featured Experience</h2>
           </div>
 
           <div className="relative w-full flex items-center justify-center" style={{ perspective: 1000 }}>
@@ -308,13 +310,15 @@ export const Experience = () => {
             let zIndex = isCenter ? 30 : 10;
             let isLocked = !isCenter;
 
+            const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
             if (isLeft) {
-              x = -220;
-              scale = 0.92;
+              x = isMobile ? -160 : -220;
+              scale = isMobile ? 0.88 : 0.92;
               opacity = 0.55;
             } else if (isRight) {
-              x = 220;
-              scale = 0.92;
+              x = isMobile ? 160 : 220;
+              scale = isMobile ? 0.88 : 0.92;
               opacity = 0.55;
             } else if (!isCenter) {
               opacity = 0;
@@ -364,7 +368,7 @@ export const Experience = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-          >
+            >
             <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowDetails(false)}
@@ -392,7 +396,7 @@ export const Experience = () => {
                     onClick={() => setShowDetails(false)}
                     className="text-dark-text/50 hover:text-dark-text"
                     aria-label="Close"
-                  >
+              >
                     ×
               </button>
             </div>
@@ -400,27 +404,47 @@ export const Experience = () => {
                 <div className="space-y-4">
                   {[
                     {
-                      title: "Step 1 · Get Started",
-                      description: "Tap Redeem now. You’ll land on the Start Referring page.",
+                      title: "Step 1 · Get started",
+                      description: (
+                        <>
+                          Tap <span className="font-semibold">Refer Now</span> to open the Start Referring page.
+                        </>
+                      ),
                     },
                     {
-                      title: "Step 2 · Add Your Details",
-                      description: "Enter your full name and phone number, then hit Refer Now.",
+                      title: "Step 2 · Add your details",
+                      description: (
+                        <>
+                          Enter your full name and phone number, then tap <span className="font-semibold">Refer Now</span>.
+                        </>
+                      ),
                     },
                     {
-                      title: "Step 3 · Share the Word",
-                      description:
-                        "Choose how you want to spread the word — WhatsApp, Instagram or LinkedIn. We’ll load a pre-written message; all you have to do is hit Send.",
+                      title: "Step 3 · Share the word",
+                      description: (
+                        <>
+                          Choose how you want to spread the word: WhatsApp, Instagram or LinkedIn. We load a pre written message, you just hit{" "}
+                          <span className="font-semibold">Send</span>.
+                        </>
+                      ),
                     },
                     {
-                      title: "Step 4 · When They Book",
-                      description:
-                        "When your friends book a Flent Home, they’ll be asked who referred them. They just need to add your name and number in their onboarding form.",
+                      title: "Step 4 · When they book",
+                      description: (
+                        <>
+                          When your friends book a Flent home, they will be asked who referred them. They just need to add your name and number in their onboarding
+                          form.
+                        </>
+                      ),
                     },
                     {
-                      title: "Step 5 · Win Big",
-                      description:
-                        "Every successful referral counts. Earn 4 confirmed bookings and you’ll win an all-expenses-paid trip to the GOAT Tour India, Mumbai on 15th Dec 2025.",
+                      title: "Step 5 · Win big",
+                      description: (
+                        <>
+                          Every successful referral counts. Get <span className="font-semibold">4 confirmed bookings</span> and you will win an all expenses paid trip
+                          to the <span className="font-semibold">G.O.A.T. India Tour 2025</span>.
+                        </>
+                      ),
                     },
                   ].map((step, index) => (
                     <div
@@ -430,9 +454,7 @@ export const Experience = () => {
                       <p className="font-sans font-semibold text-dark-text mb-2">
                         {step.title}
                       </p>
-                      <p className="font-sans text-sm leading-relaxed text-dark-text/80">
-                        {step.description}
-                      </p>
+                      <p className="font-sans text-sm leading-relaxed text-dark-text/80">{step.description}</p>
                     </div>
                   ))}
                 </div>

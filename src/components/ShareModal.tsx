@@ -43,12 +43,15 @@ export const ShareModal = ({ isOpen, onClose, fullName, phone }: ShareModalProps
     return copied;
   };
 
+  const displayName = fullName?.trim() || "your name";
+  const displayPhone = phone?.trim() || "your number";
+
   const messages = {
-    whatsapp: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
-    
-    instagram: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
-    
-    generic: `Hey! Check out Flent: ${url}\n\nThey’ve got really nice fully furnished homes ready to move into.\n\nIf you end up booking, just mention my name (${fullName}) and number (${phone}) in the onboarding form!`,
+    whatsapp: `Hey, check out Flent: ${url}\n\nThey offer fully furnished rental homes in Bangalore that are ready to move into. You can either book an entire home or just a room in one!\n\nIf you decide to book, please mention my name (${displayName}) and my number (${displayPhone}) in the onboarding form.`,
+
+    instagram: `Hey, check out Flent: ${url}\n\nThey offer fully furnished rental homes in Bangalore that are ready to move into. You can either book an entire home or just a room in one!\n\nIf you decide to book, please mention my name (${displayName}) and my number (${displayPhone}) in the onboarding form.`,
+
+    generic: `Hey, check out Flent: ${url}\n\nThey offer fully furnished rental homes in Bangalore that are ready to move into. You can either book an entire home or just a room in one!\n\nIf you decide to book, please mention my name (${displayName}) and my number (${displayPhone}) in the onboarding form.`,
   };
 
   const copyGenericLink = async () => {
