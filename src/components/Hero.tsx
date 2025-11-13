@@ -31,7 +31,7 @@ export const Hero = () => {
           onClick={scrollToExperience}
           className="absolute bottom-24 left-1/2 -translate-x-1/2 px-7 py-3 rounded-full border border-light-text/70 text-light-text font-sans font-medium backdrop-blur hover:border-white transition md:static md:translate-x-0 md:bottom-auto md:mt-0"
         >
-          Here&apos;s yours
+          Show me how
         </button>
       </div>
     </section>
