@@ -3,12 +3,13 @@ import { AnimatePresence, motion, useScroll, useTransform, useInView } from "fra
 import { useToast } from "@/hooks/use-toast";
 import { ShareModal } from "./ShareModal";
 import { supabase } from "../lib/supabaseClient";
+import { assetUrl } from "@/utils/assetUrl";
 
 const VIEWERS = [15, 27, 46, 53, 65, 76, 84, 98, 102, 112, 124, 133, 148, 152];
 const CARD_IMAGES = [
-  { src: "/card%20one.png", alt: "Card one" },
-  { src: "/card%20two.png", alt: "Card two" },
-  { src: "/card%20three.png", alt: "Card three" },
+  { src: assetUrl("card%20one.png"), alt: "Card one" },
+  { src: assetUrl("card%20two.png"), alt: "Card two" },
+  { src: assetUrl("card%20three.png"), alt: "Card three" },
 ];
 
 const SOCIAL_LINKS = [
@@ -485,7 +486,7 @@ export const FinalWhite = () => {
             <div className="mx-auto w-full max-w-[420px] rounded-none border border-dark-text/10 bg-white/75 px-6 pt-6 pb-6 shadow-xl backdrop-blur-sm sm:max-w-[520px] sm:rounded-[32px] sm:px-8 sm:pt-8 lg:-mx-10 lg:w-auto lg:max-w-none lg:flex lg:items-start lg:justify-between lg:rounded-[48px] lg:px-14 lg:pt-6 lg:pb-8">
               <div className="relative flex-1 max-w-xl w-full flex flex-col items-center lg:items-start">
                 <img
-                  src="/logo%20flent%20.png"
+                  src={assetUrl("logo%20flent%20.png")}
                   alt="Flent wordmark"
                   className="hidden sm:block sm:h-[260px] sm:translate-x-0 sm:translate-y-0 lg:h-[440px] lg:translate-x-0 lg:absolute lg:top-[-160px] lg:left-[-108px]"
                   loading="lazy"
@@ -530,13 +531,13 @@ export const FinalWhite = () => {
           </footer>
         </div>
         <img
-          src="/fonts/final%20ill.png"
+          src={assetUrl("fonts/final%20ill.png")}
           alt="Experience illustration"
           className="hidden md:block absolute left-16 bottom-[300px] w-[260px] pointer-events-none select-none"
           loading="lazy"
         />
         <img
-          src="/fonts/final%20ill.png"
+          src={assetUrl("fonts/final%20ill.png")}
           alt="Mobile experience illustration"
           className="block md:hidden mx-auto mt-8 w-[220px] pointer-events-none select-none"
           loading="lazy"

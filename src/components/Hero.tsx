@@ -1,4 +1,5 @@
 import React from "react";
+import { assetUrl } from "@/utils/assetUrl";
 
 export const Hero = () => {
   const scrollToStory = () => {
@@ -16,11 +17,11 @@ export const Hero = () => {
       <div className="absolute inset-0">
         <img
           className="block md:hidden w-full h-full object-cover"
-          src="/fonts/YOLO%20(2).png"
+          src={assetUrl("fonts/YOLO%20(2).png")}
           alt="YOLO hero background mobile"
         />
         <img
-          src="/fonts/YOLO%20(1).png"
+          src={assetUrl("fonts/YOLO%20(1).png")}
           alt="YOLO hero background"
           className="hidden md:block w-full h-full object-cover"
         />

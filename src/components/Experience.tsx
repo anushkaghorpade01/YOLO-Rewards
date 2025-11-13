@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { assetUrl } from "@/utils/assetUrl";
 
 type ExperienceConfig = {
   id: string;
@@ -20,7 +21,7 @@ const experiences: ExperienceConfig[] = [
     amount: "₹50,000",
     event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
-    videoSrc: "/Left%20carousel.png",
+    videoSrc: assetUrl("Left%20carousel.png"),
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
     placeholder: true,
   },
@@ -31,7 +32,7 @@ const experiences: ExperienceConfig[] = [
     amount: "₹50,000",
     event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
-    videoSrc: "/fonts/messi%20final.mp4",
+    videoSrc: assetUrl("fonts/messi%20final.mp4"),
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
   },
   {
@@ -40,7 +41,7 @@ const experiences: ExperienceConfig[] = [
     amount: "₹50,000",
     event: "G.O.A.T India Tour 2025",
     minReferrals: 4,
-    videoSrc: "/Right%20Carousel.png",
+    videoSrc: assetUrl("Right%20Carousel.png"),
     detailsUrl: "https://wry-chef-6d0.notion.site/Flent-x-Messi-India-Tour-Giveaway-29d0c38bc238805da355d55be8e0b431?source=copy_link",
     placeholder: true,
   },

@@ -1,6 +1,7 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { PARAGRAPHS } from "@/data/storyCopy";
+import { assetUrl } from "@/utils/assetUrl";
 
 const StoryStepper = () => {
   return (
@@ -49,9 +50,9 @@ export const Story = () => {
           </div>
 
           <img
-            src="/fonts/story.png"
+            src={assetUrl("fonts/story.png")}
             alt="Story illustration"
-            className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-full max-w-[320px] sm:max-w-[420px] md:max-w-[560px] pointer-events-none select-none"
+            className="w-[260px] md:w-[300px] lg:w-[360px]"
             loading="lazy"
           />
         </motion.div>
