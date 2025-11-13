@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent, useRef } from "react";
 import { AnimatePresence, motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { ShareModal } from "./ShareModal";
+import { supabase } from "../lib/supabaseClient";
 
 const VIEWERS = [15, 27, 46, 53, 65, 76, 84, 98, 102, 112, 124, 133, 148, 152];
 const CARD_IMAGES = [
@@ -160,6 +161,10 @@ export const FinalWhite = () => {
   const [viewerIndex, setViewerIndex] = useState(0);
   const [cardOrder, setCardOrder] = useState(() => [...CARD_IMAGES]);
   const [cardAnimationActive, setCardAnimationActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isNotifySubmitting, setIsNotifySubmitting] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
 
   const { toast } = useToast();
   const finalRef = useRef<HTMLDivElement>(null);
@@ -206,12 +211,62 @@ export const FinalWhite = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (isExpired) return;
+    if (isExpired || isSubmitting) return;
 
-    // TODO: Insert to Supabase referrers table
-    // await supabase.from('referrers').insert({ full_name: fullName, phone });
+    if (!supabase) {
+      setSubmitError("Referral service is not configured yet. Please try again later.");
+      return;
+    }
 
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const sanitizedName = fullName.trim();
+    const sanitizedPhone = phone.trim();
+
+    const { error } = await supabase
+      .from("YOLO_referrals")
+      .insert({ full_name: sanitizedName, phone: sanitizedPhone, source: "final_white" });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      console.error("Failed to save referral", error);
+      setSubmitError("We couldn’t save your details. Please try again in a moment.");
+      return;
+    }
+
+    toast({ title: "You’re in!", description: "Share YOLO with your friends to complete the referral." });
     setShowShareModal(true);
+  };
+
+  const handleNotifySubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isNotifySubmitting) return;
+
+    if (!supabase) {
+      setNotifyError("Notifications aren’t configured yet. Please try again later.");
+      return;
+    }
+
+    setIsNotifySubmitting(true);
+    setNotifyError(null);
+
+    const email = notifyEmail.trim().toLowerCase();
+    const { error } = await supabase.from("YOLO_notifications").insert({ email });
+
+    setIsNotifySubmitting(false);
+
+    if (error) {
+      console.error("Failed to store notification email", error);
+      setNotifyError("Couldn’t add your email right now. Please try again.");
+      return;
+    }
+
+    toast({ title: "All set", description: "We’ll let you know when the next experience unlocks." });
+    setShowNotifyModal(false);
+    setNotifyEmail("");
   };
 
   useEffect(() => {
@@ -321,7 +376,10 @@ export const FinalWhite = () => {
                       id="full-name"
                       type="text"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (submitError) setSubmitError(null);
+                      }}
                       placeholder="e.g. Alex Fernandes"
                       required
                       disabled={isExpired}
@@ -337,7 +395,10 @@ export const FinalWhite = () => {
                       id="phone-number"
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (submitError) setSubmitError(null);
+                      }}
                       placeholder="10-digit mobile"
                       pattern="[0-9]{10}"
                       required
@@ -350,11 +411,16 @@ export const FinalWhite = () => {
                   <button
                     id="refer-now"
                     type="submit"
-                    disabled={isExpired}
+                    disabled={isExpired || isSubmitting}
                     className="w-full px-6 py-4 bg-coral text-light-text rounded-xl font-sans font-semibold hover:bg-coral-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {isExpired ? "Offer Ended" : "Refer Now"}
+                    {isExpired ? "Offer Ended" : isSubmitting ? "Saving…" : "Refer Now"}
                   </button>
+                  {submitError && (
+                    <p className="text-sm text-red-600 text-center" role="alert">
+                      {submitError}
+                    </p>
+                  )}
                   <div className="flex items-center justify-center">
                     <button
                       type="button"
@@ -500,6 +566,7 @@ export const FinalWhite = () => {
               onClick={() => {
                 setShowNotifyModal(false);
                 setNotifyEmail("");
+                setNotifyError(null);
               }}
             />
             <motion.div
@@ -521,6 +588,7 @@ export const FinalWhite = () => {
                   onClick={() => {
                     setShowNotifyModal(false);
                     setNotifyEmail("");
+                    setNotifyError(null);
                   }}
                   className="text-dark-text/50 transition hover:text-dark-text focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 rounded-full"
                   aria-label="Close notify modal"
@@ -528,30 +596,32 @@ export const FinalWhite = () => {
                   ×
                 </button>
               </div>
-              <form
-                className="mt-6 space-y-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  setShowNotifyModal(false);
-                  setNotifyEmail("");
-                }}
-              >
+              <form className="mt-6 space-y-4" onSubmit={handleNotifySubmit}>
                 <label className="block">
                   <span className="sr-only">Email address</span>
                   <input
                     type="email"
                     required
                     value={notifyEmail}
-                    onChange={(event) => setNotifyEmail(event.target.value)}
+                    onChange={(event) => {
+                      setNotifyEmail(event.target.value);
+                      if (notifyError) setNotifyError(null);
+                    }}
                     placeholder="your@email.com"
                     className="w-full rounded-2xl border border-dark-text/15 bg-secondary px-4 py-3 font-sans text-dark-text placeholder:text-dark-text/40 focus:outline-none focus:ring-2 focus:ring-coral"
                   />
                 </label>
+                {notifyError && (
+                  <p className="text-sm text-red-600" role="alert">
+                    {notifyError}
+                  </p>
+                )}
                 <button
                   type="submit"
-                  className="w-full rounded-2xl bg-coral px-5 py-3 font-sans font-semibold text-light-text transition hover:bg-coral-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+                  disabled={isNotifySubmitting}
+                  className="w-full rounded-2xl bg-coral px-5 py-3 font-sans font-semibold text-light-text transition hover:bg-coral-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Notify Me
+                  {isNotifySubmitting ? "Adding you…" : "Notify Me"}
                 </button>
               </form>
             </motion.div>
